@@ -183,30 +183,30 @@ Finding(id, analysis_id, resource_id, detector, severity, risk, current_cost,
 **Objective:** add a second signal and make analysis scale asynchronously.
 
 **Backend**
-- [ ] Kubernetes manifest parser (PyYAML) → workload model (requests/limits, replicas, HPA)
-- [ ] K8s detectors: missing CPU/mem limits, over-request vs usage, replica over-provisioning, missing HPA, unused Service
-- [ ] **Async job queue** (Redis + RQ/Celery) + worker pool; analyses run as idempotent, retryable jobs
-- [ ] Postgres persistence (Analyses/Resources/Findings) + migrations (Alembic)
-- [ ] Historical trend endpoint (savings over time)
+- [x] Kubernetes manifest parser (PyYAML) → workload model (requests/limits, replicas, HPA)
+- [x] K8s detectors: missing CPU/mem limits, over-request vs usage, replica over-provisioning, missing HPA, unused Service
+- [x] **Async job queue** (Redis + RQ/Celery) + worker pool; analyses run as idempotent, retryable jobs
+- [x] Postgres persistence (Analyses/Resources/Findings) + migrations (Alembic)
+- [x] Historical trend endpoint (savings over time)
 
 **Frontend**
-- [ ] Job status/progress UI (queued → running → done)
-- [ ] Charts (savings by service, findings by type) with Recharts
+- [x] Job status/progress UI (queued → running → done)
+- [x] Charts (savings by service, findings by type) with Recharts
 
 **AI**
-- [ ] Explanations extended to K8s findings
+- [x] Explanations extended to K8s findings
 
 **Infrastructure**
-- [ ] Compose adds redis + postgres + worker
+- [x] Compose adds redis + postgres + worker
 
 **Testing**
-- [ ] K8s detector unit tests; job-queue integration test (enqueue → process → persist)
+- [x] K8s detector unit tests; job-queue integration test (enqueue → process → persist)
 
 **Documentation**
-- [ ] Architecture doc updated with the async pipeline
+- [x] Architecture doc updated with the async pipeline
 
 **Deployment**
-- [ ] Seeded demo database
+- [x] Seeded demo database
 
 **Resume improvement:** *"Re-architected analysis into an asynchronous job queue with a worker pool (Redis + Celery) and Postgres persistence, adding a Kubernetes manifest scanner with five workload detectors."*
 
