@@ -9,9 +9,10 @@ from typing import Annotated
 from ai import Narrative, make_explainer, prioritize_analysis
 from engine.aggregate import AnalysisAggregate
 from engine.models import Finding
-from engine.pipeline import analyze
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from engine.pipeline import AnalysisResult, analyze
+from fastapi import APIRouter, File, HTTPException, Response, UploadFile
 
+from api import report
 from api.sample_data import SAMPLE_CSV, SAMPLE_TF
 from api.store import store
 from api.v1.schemas import AnalysisSummary, FindingDetail
@@ -92,6 +93,40 @@ def get_narrative(analysis_id: str) -> Narrative:
     if result is None:
         raise HTTPException(status_code=404, detail="analysis not found")
     return prioritize_analysis(result.aggregate)
+
+
+def _require(analysis_id: str) -> AnalysisResult:
+    result = store.get(analysis_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="analysis not found")
+    return result
+
+
+@router.get("/analyses/{analysis_id}/report.md")
+def report_markdown(analysis_id: str) -> Response:
+    result = _require(analysis_id)
+    md = report.to_markdown(result, prioritize_analysis(result.aggregate))
+    return Response(
+        content=md,
+        media_type="text/markdown",
+        headers={"Content-Disposition": f'attachment; filename="cloudtrim-{analysis_id}.md"'},
+    )
+
+
+@router.get("/analyses/{analysis_id}/report.pdf")
+def report_pdf(analysis_id: str) -> Response:
+    result = _require(analysis_id)
+    try:
+        pdf = report.to_pdf(result, prioritize_analysis(result.aggregate))
+    except ImportError as exc:  # optional [reports] extra not installed
+        raise HTTPException(
+            status_code=501, detail="PDF export unavailable: install the [reports] extra"
+        ) from exc
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="cloudtrim-{analysis_id}.pdf"'},
+    )
 
 
 @router.get("/analyses/{analysis_id}/findings", response_model=list[Finding])

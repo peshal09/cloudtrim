@@ -47,6 +47,11 @@ export interface FindingDetail {
   resource: Resource | null;
 }
 
+export interface Narrative {
+  text: string;
+  source: "template" | "llm";
+}
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
   return res.json() as Promise<T>;
@@ -82,6 +87,16 @@ export function listFindings(id: string): Promise<Finding[]> {
 
 export function getFinding(id: string): Promise<FindingDetail> {
   return fetch(`${API_URL}/api/v1/findings/${id}`).then(json<FindingDetail>);
+}
+
+export function getNarrative(id: string): Promise<Narrative> {
+  return fetch(`${API_URL}/api/v1/analyses/${id}/narrative`).then(
+    json<Narrative>,
+  );
+}
+
+export function reportUrl(id: string, fmt: "md" | "pdf"): string {
+  return `${API_URL}/api/v1/analyses/${id}/report.${fmt}`;
 }
 
 export function money(n: number): string {

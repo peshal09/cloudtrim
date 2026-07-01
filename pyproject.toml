@@ -29,6 +29,11 @@ aws = [
 ai = [
     "LLM>=0.40",
 ]
+# PDF report export. fpdf2 is pure-Python (no system libraries) — Markdown export
+# works without it.
+reports = [
+    "fpdf2>=2.7",
+]
 
 [build-system]
 requires = ["setuptools>=68"]

@@ -8,10 +8,13 @@ import {
   AnalysisSummary,
   Finding,
   FindingDetail,
+  Narrative,
   getAnalysis,
   getFinding,
+  getNarrative,
   listFindings,
   money,
+  reportUrl,
 } from "../../lib/api";
 
 const SEV_RANK: Record<string, number> = { high: 3, medium: 2, low: 1 };
@@ -21,15 +24,17 @@ export default function DashboardPage() {
   const { id } = useParams<{ id: string }>();
   const [summary, setSummary] = useState<AnalysisSummary | null>(null);
   const [findings, setFindings] = useState<Finding[]>([]);
+  const [narrative, setNarrative] = useState<Narrative | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("savings");
   const [selected, setSelected] = useState<FindingDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([getAnalysis(id), listFindings(id)])
-      .then(([s, f]) => {
+    Promise.all([getAnalysis(id), listFindings(id), getNarrative(id)])
+      .then(([s, f, n]) => {
         setSummary(s);
         setFindings(f);
+        setNarrative(n);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Load failed"));
   }, [id]);
@@ -51,9 +56,25 @@ export default function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-5xl p-8">
-      <Link href="/" className="text-sm text-gray-500 hover:underline">
-        ← New analysis
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/" className="text-sm text-gray-500 hover:underline">
+          ← New analysis
+        </Link>
+        <div className="flex gap-2">
+          <a
+            href={reportUrl(id, "md")}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Export .md
+          </a>
+          <a
+            href={reportUrl(id, "pdf")}
+            className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
+          >
+            Export PDF
+          </a>
+        </div>
+      </div>
 
       {/* Savings hero + severity breakdown */}
       <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -78,6 +99,23 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
+
+      {/* Prioritization narrative */}
+      {narrative && (
+        <section className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-700">
+              Prioritization
+            </h2>
+            <span className="text-xs text-gray-400">
+              source: {narrative.source}
+            </span>
+          </div>
+          <p className="mt-2 whitespace-pre-line text-sm text-gray-800">
+            {narrative.text}
+          </p>
+        </section>
+      )}
 
       {/* Findings table */}
       <section className="mt-6 overflow-hidden rounded-xl border border-gray-200">
