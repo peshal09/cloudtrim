@@ -24,6 +24,11 @@ dev = [
 aws = [
     "boto3>=1.35",
 ]
+# LLM explainer (LLM). Optional: the deterministic template path serves
+# tests/eval/demo with no key or network (see [[deterministic-offline-path]]).
+ai = [
+    "LLM>=0.40",
+]
 
 [build-system]
 requires = ["setuptools>=68"]

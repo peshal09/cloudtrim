@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
+from ai import make_explainer
 from engine.models import Finding
 from engine.pipeline import analyze
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -14,6 +15,9 @@ from api.store import store
 from api.v1.schemas import AnalysisSummary, FindingDetail
 
 router = APIRouter(tags=["analyses"])
+
+# Template path unless CLOUDTRIM_LLM_API_KEY is set (see [[deterministic-offline-path]]).
+_explain = make_explainer()
 
 _MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB; tighter limits + streaming come in Week 5
 
@@ -37,6 +41,7 @@ async def create_analysis(
     csv_text = await _read_text(billing) if billing is not None else None
 
     result = analyze(
+        explain=_explain,
         terraform_source=tf_text,
         billing_source=csv_text,
         source_meta={
