@@ -9,6 +9,7 @@ Week 2 extends this to a benchmark of fixtures with CI gating (BLUEPRINT §3).
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from pathlib import Path
 
 from engine.detectors import run_detectors
@@ -59,30 +60,46 @@ def _score(name: str) -> tuple[int, int, int, float, float]:
     for key in fp:
         print(f"  EXTRA {key[0]:20} {key[1]}")
 
-    return len(tp), len(fp), len(fn), savings_ok, len(tp)
+    return tp, fp, fn, savings_ok
+
+
+def _rate(num: int, den: int) -> float:
+    return num / den if den else 1.0
 
 
 def main() -> int:
     fixtures = [p.stem for p in sorted(_GROUND_TRUTH.glob("*.json"))]
+    # per-detector tallies: detector -> [tp, fp, fn]
+    tally: dict[str, list[int]] = defaultdict(lambda: [0, 0, 0])
     tp = fp = fn = savings_ok = savings_total = 0
-    for name in fixtures:
-        a, b, c, ok, tot = _score(name)
-        tp, fp, fn, savings_ok, savings_total = (
-            tp + a,
-            fp + b,
-            fn + c,
-            savings_ok + ok,
-            savings_total + tot,
-        )
 
-    precision = tp / (tp + fp) if (tp + fp) else 0.0
-    recall = tp / (tp + fn) if (tp + fn) else 0.0
-    savings_acc = savings_ok / savings_total if savings_total else 0.0
+    for name in fixtures:
+        tp_keys, fp_keys, fn_keys, ok = _score(name)
+        savings_ok += ok
+        savings_total += len(tp_keys)
+        for det, _ in tp_keys:
+            tally[det][0] += 1
+        for det, _ in fp_keys:
+            tally[det][1] += 1
+        for det, _ in fn_keys:
+            tally[det][2] += 1
+        tp, fp, fn = tp + len(tp_keys), fp + len(fp_keys), fn + len(fn_keys)
+
+    print("\n=== per-detector ===")
+    print(f"  {'detector':22} {'TP':>3} {'FP':>3} {'FN':>3}  {'prec':>6} {'recall':>6}")
+    for det in sorted(tally):
+        t, f, n = tally[det]
+        print(f"  {det:22} {t:>3} {f:>3} {n:>3}  {_rate(t, t + f):>6.0%} {_rate(t, t + n):>6.0%}")
+
+    precision = _rate(tp, tp + fp)
+    recall = _rate(tp, tp + fn)
+    savings_acc = _rate(savings_ok, savings_total)
 
     print("\n=== summary ===")
+    print(f"  fixtures: {len(fixtures)}   findings evaluated: {tp + fn}")
     print(f"  precision: {precision:.2%}   recall: {recall:.2%}")
     print(f"  savings accuracy (matched findings): {savings_acc:.2%}")
-    # Non-zero exit if we regressed below a perfect labeled fixture.
+    # Non-zero exit if we regressed below a perfect labeled benchmark.
     return 0 if (fp == 0 and fn == 0 and savings_ok == tp) else 1
 
 

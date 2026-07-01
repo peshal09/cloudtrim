@@ -1,0 +1,5 @@
+{
+  "fixture": "clean",
+  "description": "Well-configured stack with no waste. Any finding is a false positive.",
+  "expected_findings": []
+}

@@ -1,0 +1,9 @@
+{
+  "fixture": "fleet",
+  "description": "Idle billed instance, an oversized config-only instance, and an S3 bucket with no lifecycle.",
+  "expected_findings": [
+    {"detector": "idle_ec2", "identifier": "aws_instance.a", "monthly_savings": 121.47},
+    {"detector": "oversized_ec2", "identifier": "aws_instance.b", "monthly_savings": 124.10},
+    {"detector": "missing_s3_lifecycle", "identifier": "aws_s3_bucket.data", "monthly_savings": 0.0}
+  ]
+}

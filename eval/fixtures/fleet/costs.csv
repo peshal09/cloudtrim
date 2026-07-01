@@ -1,0 +1,2 @@
+identifier,service,region,instance_type,monthly_cost,cpu_utilization
+aws_instance.a,ec2,us-east-1,t3.2xlarge,242.94,2.0
