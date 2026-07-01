@@ -12,8 +12,10 @@ services:
       CLOUDTRIM_DATABASE_URL: postgresql+psycopg://cloudtrim:cloudtrim@postgres:5432/cloudtrim
       CLOUDTRIM_REDIS_URL: redis://redis:6379/0
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   worker:
     build:
@@ -23,8 +25,10 @@ services:
       CLOUDTRIM_DATABASE_URL: postgresql+psycopg://cloudtrim:cloudtrim@postgres:5432/cloudtrim
       CLOUDTRIM_REDIS_URL: redis://redis:6379/0
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   web:
     build:
@@ -41,6 +45,11 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
 
   postgres:
     image: postgres:16-alpine
@@ -52,6 +61,11 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudtrim"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
 
 # Seed the demo analysis into the DB:
 #   docker compose run --rm api python scripts/seed_demo.py
