@@ -2,15 +2,15 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install deps first for layer caching.
+# Install deps first for layer caching. [db,queue] enables the async path;
+# [reports] the PDF export.
 COPY pyproject.toml ./
-RUN pip install --no-cache-dir ".[dev]" || pip install --no-cache-dir \
-    "fastapi>=0.115" "uvicorn[standard]>=0.32" "pydantic>=2.9" \
-    "pydantic-settings>=2.6" "python-multipart>=0.0.12"
+RUN pip install --no-cache-dir ".[db,queue,reports]"
 
 # Source (packages are imported via PYTHONPATH; scaffold has no editable install).
 COPY apps/api ./apps/api
 COPY packages ./packages
+COPY scripts ./scripts
 
 ENV PYTHONPATH=/app/apps/api:/app/packages/engine:/app/packages/ai
 

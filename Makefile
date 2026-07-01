@@ -25,6 +25,9 @@ run:
 eval:
 	python eval/run_eval.py
 
+seed:
+	python scripts/seed_demo.py
+
 web-install:
 	cd apps/web && npm install
 

@@ -1,4 +1,5 @@
-# CloudTrim local stack. Redis/Postgres/worker are added in Week 3 (see §3).
+# CloudTrim local stack. Setting the DB + Redis env turns on the async path
+# (API enqueues -> worker processes -> Postgres); the worker consumes the queue.
 services:
   api:
     build:
@@ -6,10 +7,24 @@ services:
       dockerfile: apps/api/Dockerfile
     ports:
       - "8000:8000"
-    env_file:
-      - .env
     environment:
       CLOUDTRIM_ENVIRONMENT: development
+      CLOUDTRIM_DATABASE_URL: postgresql+psycopg://cloudtrim:cloudtrim@postgres:5432/cloudtrim
+      CLOUDTRIM_REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    environment:
+      CLOUDTRIM_DATABASE_URL: postgresql+psycopg://cloudtrim:cloudtrim@postgres:5432/cloudtrim
+      CLOUDTRIM_REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
 
   web:
     build:
@@ -22,27 +37,24 @@ services:
     depends_on:
       - api
 
-  # --- Added in Week 3 (async job queue + persistence) ---
-  # redis:
-  #   image: redis:7-alpine
-  #   ports:
-  #     - "6379:6379"
-  #
-  # postgres:
-  #   image: postgres:16-alpine
-  #   environment:
-  #     POSTGRES_USER: cloudtrim
-  #     POSTGRES_PASSWORD: cloudtrim
-  #     POSTGRES_DB: cloudtrim
-  #   ports:
-  #     - "5432:5432"
-  #
-  # worker:
-  #   build:
-  #     context: .
-  #     dockerfile: apps/worker/Dockerfile
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - redis
-  #     - postgres
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cloudtrim
+      POSTGRES_PASSWORD: cloudtrim
+      POSTGRES_DB: cloudtrim
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+# Seed the demo analysis into the DB:
+#   docker compose run --rm api python scripts/seed_demo.py
+
+volumes:
+  pgdata:
