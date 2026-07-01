@@ -41,7 +41,7 @@ export function Charts({ aggregate }: { aggregate: AnalysisAggregate }) {
             <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-20} height={50} textAnchor="end" />
             <YAxis tick={{ fontSize: 10 }} />
             <Tooltip formatter={(v: number) => `$${v.toFixed(2)}`} />
-            <Bar dataKey="value" fill="#059669" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" fill="#059669" radius={[4, 4, 0, 0]} isAnimationActive={false} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -56,7 +56,7 @@ export function Charts({ aggregate }: { aggregate: AnalysisAggregate }) {
             <XAxis dataKey="name" tick={{ fontSize: 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
             <Tooltip />
-            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="value" radius={[4, 4, 0, 0]} isAnimationActive={false}>
               {severity.map((s) => (
                 <Cell key={s.name} fill={SEV_COLORS[s.name]} />
               ))}
