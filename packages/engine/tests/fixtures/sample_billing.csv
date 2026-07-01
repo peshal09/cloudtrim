@@ -1,0 +1,4 @@
+identifier,service,region,instance_type,monthly_cost,cpu_utilization,tags
+aws_instance.web,ec2,us-east-1,t3.large,$60.74,3.2,env=prod
+aws_db_instance.main,rds,us-east-1,db.t3.medium,49.28,8.0%,env=prod
+module.storage.aws_s3_bucket.logs,s3,us-east-1,,12.50,,env=prod
