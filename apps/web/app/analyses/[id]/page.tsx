@@ -9,6 +9,8 @@ import {
   Finding,
   FindingDetail,
   Narrative,
+  Risk,
+  Severity,
   getAnalysis,
   getFinding,
   getNarrative,
@@ -26,6 +28,9 @@ export default function DashboardPage() {
   const [findings, setFindings] = useState<Finding[]>([]);
   const [narrative, setNarrative] = useState<Narrative | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("savings");
+  const [sevFilter, setSevFilter] = useState<"all" | Severity>("all");
+  const [riskFilter, setRiskFilter] = useState<"all" | Risk>("all");
+  const [savingsOnly, setSavingsOnly] = useState(false);
   const [selected, setSelected] = useState<FindingDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,16 +44,21 @@ export default function DashboardPage() {
       .catch((e) => setError(e instanceof Error ? e.message : "Load failed"));
   }, [id]);
 
-  const sorted = useMemo(() => {
-    const copy = [...findings];
-    copy.sort((a, b) => {
+  const visible = useMemo(() => {
+    const rows = findings.filter(
+      (f) =>
+        (sevFilter === "all" || f.severity === sevFilter) &&
+        (riskFilter === "all" || f.risk === riskFilter) &&
+        (!savingsOnly || f.monthly_savings > 0),
+    );
+    rows.sort((a, b) => {
       if (sortKey === "savings") return b.monthly_savings - a.monthly_savings;
       if (sortKey === "severity")
         return SEV_RANK[b.severity] - SEV_RANK[a.severity];
       return SEV_RANK[b.risk] - SEV_RANK[a.risk];
     });
-    return copy;
-  }, [findings, sortKey]);
+    return rows;
+  }, [findings, sortKey, sevFilter, riskFilter, savingsOnly]);
 
   if (error)
     return <main className="p-8 text-red-600">Error: {error}</main>;
@@ -117,8 +127,33 @@ export default function DashboardPage() {
         </section>
       )}
 
+      {/* Filters */}
+      <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
+        <FilterSelect
+          label="Severity"
+          value={sevFilter}
+          onChange={(v) => setSevFilter(v as "all" | Severity)}
+        />
+        <FilterSelect
+          label="Risk"
+          value={riskFilter}
+          onChange={(v) => setRiskFilter(v as "all" | Risk)}
+        />
+        <label className="flex items-center gap-1.5 text-gray-700">
+          <input
+            type="checkbox"
+            checked={savingsOnly}
+            onChange={(e) => setSavingsOnly(e.target.checked)}
+          />
+          With savings only
+        </label>
+        <span className="text-gray-400">
+          {visible.length} of {findings.length}
+        </span>
+      </div>
+
       {/* Findings table */}
-      <section className="mt-6 overflow-hidden rounded-xl border border-gray-200">
+      <section className="mt-3 overflow-hidden rounded-xl border border-gray-200">
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-50 text-gray-600">
             <tr>
@@ -129,7 +164,7 @@ export default function DashboardPage() {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((f) => (
+            {visible.map((f) => (
               <tr
                 key={f.id}
                 onClick={() => getFinding(f.id).then(setSelected)}
@@ -158,6 +193,32 @@ export default function DashboardPage() {
         <Drawer detail={selected} onClose={() => setSelected(null)} />
       )}
     </main>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="flex items-center gap-1.5 text-gray-700">
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border border-gray-300 px-2 py-1"
+      >
+        <option value="all">all</option>
+        <option value="high">high</option>
+        <option value="medium">medium</option>
+        <option value="low">low</option>
+      </select>
+    </label>
   );
 }
 
