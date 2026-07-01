@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     github_webhook_secret: str | None = None
     github_token: str | None = None
     github_api_url: str = "https://api.github.com"
+    # Production hardening (Week 5), all opt-in so the demo stays zero-config.
+    api_keys: str = ""  # comma-separated; empty -> auth disabled (open)
+    rate_limit_per_minute: int = 0  # 0 -> disabled
+
+    def api_key_set(self) -> set[str]:
+        return {k.strip() for k in self.api_keys.split(",") if k.strip()}
 
 
 settings = Settings()

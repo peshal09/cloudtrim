@@ -14,15 +14,17 @@ from ai import Narrative, make_explainer, prioritize_analysis
 from engine.aggregate import AnalysisAggregate
 from engine.models import Finding
 from engine.pipeline import AnalysisResult, analyze, pending_result
-from fastapi import APIRouter, File, HTTPException, Response, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
 
 from api import report
 from api.jobs import async_enabled, enqueue_analysis, get_queue
 from api.sample_data import SAMPLE_CSV, SAMPLE_K8S, SAMPLE_TF
+from api.security import rate_limit, require_api_key
 from api.store import store
 from api.v1.schemas import AnalysisSummary, FindingDetail
 
-router = APIRouter(tags=["analyses"])
+# Auth + rate limiting are opt-in (no-ops until configured) — see api.security.
+router = APIRouter(tags=["analyses"], dependencies=[Depends(require_api_key), Depends(rate_limit)])
 
 # Template path unless CLOUDTRIM_LLM_API_KEY is set (see [[deterministic-offline-path]]).
 _explain = make_explainer()
