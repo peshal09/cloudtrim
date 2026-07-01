@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: default
+spec:
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: web
+        env: prod
+    spec:
+      containers:
+        - name: web
+          image: acme/web:1.0
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "256Mi"
+            # no limits
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: default
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: api
+        env: prod
+    spec:
+      containers:
+        - name: api
+          image: acme/api:1.0
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: api
+  minReplicas: 2
+  maxReplicas: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-svc
+  namespace: default
+spec:
+  selector:
+    app: web
+  ports:
+    - port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ghost-svc
+  namespace: default
+spec:
+  selector:
+    app: nonexistent
+  ports:
+    - port: 80

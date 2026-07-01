@@ -25,6 +25,7 @@ def _utcnow() -> datetime:
 
 class Provider(StrEnum):
     AWS = "aws"
+    K8S = "k8s"
 
 
 class ResourceType(StrEnum):
@@ -34,6 +35,8 @@ class ResourceType(StrEnum):
     RDS = "rds"
     S3 = "s3"
     EBS = "ebs"
+    K8S_WORKLOAD = "k8s_workload"  # Deployment / StatefulSet / DaemonSet / ReplicaSet
+    K8S_SERVICE = "k8s_service"
     OTHER = "other"
 
 
