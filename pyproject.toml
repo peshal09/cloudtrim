@@ -19,6 +19,7 @@ dev = [
     "httpx>=0.27",
     "ruff>=0.7",
     "black>=24.10",
+    "fakeredis>=2.20",  # deterministic queue tests (no Redis server)
 ]
 # Live pricing tier (ADR-0002 tier 3) + snapshot build script. Optional: the
 # committed snapshot serves tests/eval/demo with no network or creds.
@@ -34,6 +35,18 @@ ai = [
 # works without it.
 reports = [
     "fpdf2>=2.7",
+]
+# Postgres persistence + async job queue (Week 3). Optional: with neither
+# CLOUDTRIM_DATABASE_URL nor CLOUDTRIM_REDIS_URL set, the API runs synchronously
+# against an in-memory store (the zero-dependency demo path).
+db = [
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "psycopg[binary]>=3.2",
+]
+queue = [
+    "rq>=1.16",
+    "redis>=5.0",
 ]
 
 [build-system]

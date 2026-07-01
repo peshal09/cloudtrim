@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     # Browser origins allowed to call the API (the Next.js web app).
     cors_origins: list[str] = ["http://localhost:3000"]
+    # Week 3: set both to run async (enqueue -> worker -> Postgres). With neither,
+    # the API runs synchronously against an in-memory store (zero-dependency demo).
+    database_url: str | None = None
+    redis_url: str | None = None
 
 
 settings = Settings()

@@ -1,13 +1,17 @@
-"""In-memory analysis store (MVP). Postgres + persistence arrive in Week 3 (§3).
+"""Analysis store — in-memory by default, SQL-backed when CLOUDTRIM_DATABASE_URL is
+set (BLUEPRINT.md §3 Week 3).
 
-Holds completed AnalysisResults keyed by analysis id, plus a finding-id index so a
-single finding is retrievable without knowing its analysis.
+The in-memory store keeps the zero-dependency demo working; the SQL repository
+(api.db.repository) provides persistence for the async worker path. Both expose the
+same interface (save/get/get_finding/trend/clear).
 """
 
 from __future__ import annotations
 
 from engine.models import Finding, Resource
 from engine.pipeline import AnalysisResult
+
+from api.settings import settings
 
 
 class AnalysisStore:
@@ -34,10 +38,31 @@ class AnalysisStore:
         resource = next((r for r in result.resources if r.id == finding.resource_id), None)
         return finding, resource
 
+    def trend(self, limit: int = 100) -> list[dict]:
+        results = sorted(self._analyses.values(), key=lambda r: r.analysis.created_at)[:limit]
+        return [
+            {
+                "id": r.analysis.id,
+                "created_at": r.analysis.created_at.isoformat(),
+                "total_monthly_savings": r.analysis.total_monthly_savings,
+            }
+            for r in results
+        ]
+
     def clear(self) -> None:
         self._analyses.clear()
         self._finding_to_analysis.clear()
 
 
-# Process-wide singleton for the MVP (swapped for a DB-backed store in Week 3).
-store = AnalysisStore()
+def make_store():
+    """Return the configured store: SQL-backed if a database is set, else in-memory."""
+    if settings.database_url:
+        from api.db.repository import SqlAnalysisRepository
+        from api.db.session import make_engine
+
+        return SqlAnalysisRepository(make_engine(settings.database_url))
+    return AnalysisStore()
+
+
+# Process-wide store, resolved once from settings.
+store = make_store()

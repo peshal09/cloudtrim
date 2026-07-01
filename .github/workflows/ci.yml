@@ -13,9 +13,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      # [reports] so the PDF export test runs; the deterministic template path
+      # [reports] for the PDF test; [db,queue] for persistence/queue tests (which
+      # use SQLite + fakeredis, no live services). The deterministic template path
       # means no LLM/AWS keys are needed for tests or eval.
-      - run: pip install -e ".[dev,reports]"
+      - run: pip install -e ".[dev,reports,db,queue]"
       - run: make lint
       - run: make test
       - run: make eval
