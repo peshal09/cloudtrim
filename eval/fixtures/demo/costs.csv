@@ -1,0 +1,4 @@
+identifier,service,region,instance_type,monthly_cost,cpu_utilization,tags
+aws_instance.web,ec2,us-east-1,t3.xlarge,$121.47,4.1,env=prod;owner=team-platform
+aws_db_instance.main,rds,us-east-1,db.m5.xlarge,249.66,9.0,env=prod;owner=team-data
+i-0deadbeef42,ec2,us-east-1,t3.large,60.74,0.0,env=prod

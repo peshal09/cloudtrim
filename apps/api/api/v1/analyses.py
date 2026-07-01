@@ -11,6 +11,7 @@ from engine.models import Finding
 from engine.pipeline import analyze
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
+from api.sample_data import SAMPLE_CSV, SAMPLE_TF
 from api.store import store
 from api.v1.schemas import AnalysisSummary, FindingDetail
 
@@ -48,6 +49,19 @@ async def create_analysis(
             "terraform": terraform.filename,
             "billing": billing.filename if billing else None,
         },
+    )
+    store.save(result)
+    return AnalysisSummary.from_result(result)
+
+
+@router.post("/analyses/sample", status_code=201, response_model=AnalysisSummary)
+def create_sample_analysis() -> AnalysisSummary:
+    """Instant-demo: run the engine on the bundled sample dataset (no upload)."""
+    result = analyze(
+        explain=_explain,
+        terraform_source=SAMPLE_TF,
+        billing_source=SAMPLE_CSV,
+        source_meta={"sample": True},
     )
     store.save(result)
     return AnalysisSummary.from_result(result)

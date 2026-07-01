@@ -15,7 +15,9 @@ class IdleEC2Detector(Detector):
         if resource.type is not ResourceType.EC2:
             return []
         cpu = resource.utilization
-        if cpu is None or cpu >= ctx.ec2_idle_cpu_pct:
+        # cpu == 0 means nothing is running: a deletion candidate (orphaned_resource),
+        # not a rightsize. Only 0 < cpu < threshold is "underutilized, downsize".
+        if cpu is None or cpu <= 0 or cpu >= ctx.ec2_idle_cpu_pct:
             return []
 
         target = downsize(resource.instance_type) if resource.instance_type else None

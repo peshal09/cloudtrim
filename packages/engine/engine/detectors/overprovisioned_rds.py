@@ -15,7 +15,8 @@ class OverprovisionedRDSDetector(Detector):
         if resource.type is not ResourceType.RDS:
             return []
         cpu = resource.utilization
-        if cpu is None or cpu >= ctx.rds_low_cpu_pct:
+        # cpu == 0 -> deletion candidate (orphaned_resource), not a rightsize.
+        if cpu is None or cpu <= 0 or cpu >= ctx.rds_low_cpu_pct:
             return []
 
         target = downsize(resource.instance_type) if resource.instance_type else None

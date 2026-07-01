@@ -1,0 +1,12 @@
+{
+  "fixture": "demo",
+  "description": "Labeled known-waste sample. Expected findings by (detector, resource identifier).",
+  "expected_findings": [
+    {"detector": "idle_ec2", "identifier": "aws_instance.web", "monthly_savings": 60.73},
+    {"detector": "overprovisioned_rds", "identifier": "aws_db_instance.main", "monthly_savings": 124.83},
+    {"detector": "oversized_ec2", "identifier": "aws_instance.batch", "monthly_savings": 248.2},
+    {"detector": "missing_s3_lifecycle", "identifier": "aws_s3_bucket.logs", "monthly_savings": 0.0},
+    {"detector": "governance", "identifier": "aws_instance.batch", "monthly_savings": 0.0},
+    {"detector": "orphaned_resource", "identifier": "i-0deadbeef42", "monthly_savings": 60.74}
+  ]
+}
