@@ -1,0 +1,65 @@
+"""Analysis pipeline — compose the deterministic engine end to end (BLUEPRINT.md §4).
+
+    parse -> normalize -> detect -> price -> risk-score  [-> explain]
+
+The explainer is injected (the engine never imports the AI layer — the one law's
+dependency direction). In Week 3 this same function runs inside a worker job.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from dataclasses import dataclass
+
+from engine.detectors import DetectContext, run_detectors
+from engine.models import Analysis, AnalysisStatus, Finding, Resource
+from engine.normalizer import normalize
+from engine.parsers import parse_billing, parse_terraform
+from engine.pricing import apply_pricing
+from engine.pricing.client import PricingClient
+from engine.risk import apply_risk
+
+Explainer = Callable[[Finding, Resource | None], None]
+
+
+@dataclass
+class AnalysisResult:
+    analysis: Analysis
+    resources: list[Resource]
+    findings: list[Finding]
+
+
+def analyze(
+    terraform_source: str | None = None,
+    billing_source: str | None = None,
+    ctx: DetectContext | None = None,
+    pricing_client: PricingClient | None = None,
+    explain: Explainer | None = None,
+    source_meta: dict | None = None,
+) -> AnalysisResult:
+    analysis = Analysis(status=AnalysisStatus.RUNNING, source_meta=dict(source_meta or {}))
+
+    config = parse_terraform(terraform_source) if terraform_source else []
+    billing = parse_billing(billing_source) if billing_source else []
+    resources = normalize(config, billing, analysis.id)
+
+    findings = run_detectors(resources, ctx)
+    apply_pricing(findings, resources, client=pricing_client)
+    apply_risk(findings, resources)
+
+    if explain is not None:
+        by_id = {r.id: r for r in resources}
+        for finding in findings:
+            explain(finding, by_id.get(finding.resource_id))
+
+    analysis.total_monthly_savings = round(sum(f.monthly_savings for f in findings), 2)
+    analysis.source_meta.update(
+        {
+            "config_resources": len(config),
+            "billing_resources": len(billing),
+            "resources": len(resources),
+            "findings": len(findings),
+        }
+    )
+    analysis.status = AnalysisStatus.COMPLETE
+    return AnalysisResult(analysis=analysis, resources=resources, findings=findings)

@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 
+from api.v1.analyses import router as analyses_router
+
 router = APIRouter()
 
 
@@ -9,4 +11,4 @@ def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
-# Feature endpoints (analyses, findings) are added in Week 1 MVP — see docs/BLUEPRINT.md §2.
+router.include_router(analyses_router)
