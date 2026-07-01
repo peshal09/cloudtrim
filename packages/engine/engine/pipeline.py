@@ -18,6 +18,7 @@ from engine.normalizer import normalize
 from engine.parsers import parse_billing, parse_k8s, parse_terraform
 from engine.pricing import apply_pricing
 from engine.pricing.client import PricingClient
+from engine.remediation import generate_k8s_patch, generate_tf_patch
 from engine.risk import apply_risk
 
 Explainer = Callable[[Finding, Resource | None], None]
@@ -70,6 +71,17 @@ def analyze(
     findings = run_detectors(resources, ctx)
     apply_pricing(findings, resources, client=pricing_client)
     apply_risk(findings, resources)
+
+    # Upgrade the placeholder remediation snippet to a real, applicable patch when
+    # we have the original source text (BLUEPRINT §4 Week 4).
+    for finding in findings:
+        patch = None
+        if terraform_source:
+            patch = generate_tf_patch(finding, terraform_source)
+        if patch is None and kubernetes_source:
+            patch = generate_k8s_patch(finding, kubernetes_source)
+        if patch is not None:
+            finding.remediation_diff = patch
 
     if explain is not None:
         by_id = {r.id: r for r in resources}
