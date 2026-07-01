@@ -32,6 +32,20 @@ parse (tf / k8s / billing) → normalize (cross-signal join) → detect (11 dete
   → price (3-tier) → risk-score → aggregate (dedupe) → explain (bounded LLM)
 ```
 
+```mermaid
+flowchart LR
+  TF[Terraform] --> N[Normalizer]
+  K8[Kubernetes] --> N
+  B[Billing] --> N
+  N --> D[Detectors x11]
+  D --> P[Pricing 3-tier]
+  P --> R[Risk scorer]
+  R --> AG[Aggregate + dedupe]
+  AG --> X[Explain + prioritize]
+  X --> RM[Remediation codegen]
+  RM --> PR[Fix PR / report / dashboard]
+```
+
 Two signals feed one model: Terraform/K8s config (what's declared) and billing
 (what it costs and how it's used), joined by identifier/tags in the normalizer.
 

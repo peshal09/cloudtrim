@@ -21,13 +21,27 @@ The **engine is authoritative; the LLM is a narrator.** Parsing, detection, pric
 
 ## Status
 
-✅ **Weeks 1–5 complete** — Terraform **and Kubernetes** + billing → parse → normalize → detect (11 anti-patterns) → price → risk-score → aggregate → explain → prioritize → **remediate**, delivered as a dashboard, exportable reports, and **fix PRs via a GitHub App** — now **production-hardened** (auth, rate limiting, JSON logs + request IDs, Prometheus metrics, deploy config + CI/CD). Runs synchronously with zero dependencies, or **async** (Redis/RQ worker + Postgres) when configured. Next: Week 6 (a stretch feature + interview packaging). See [`docs/BLUEPRINT.md`](docs/BLUEPRINT.md), [`docs/architecture.md`](docs/architecture.md), [`docs/github-app.md`](docs/github-app.md), and [`docs/operations.md`](docs/operations.md).
+🏁 **v1.0 — all six weeks complete.** Terraform **and Kubernetes** + billing → parse → normalize → detect (11 anti-patterns) → price → risk-score → aggregate → explain → prioritize → **remediate**, delivered as a dashboard, exportable reports, and **fix PRs via a GitHub App**, plus **cost anomaly detection + forecast** — production-hardened (auth, rate limiting, JSON logs + request IDs, Prometheus metrics, deploy config + CI/CD). Runs synchronously with zero dependencies, or **async** (Redis/RQ worker + Postgres) when configured.
 
-**What's in:** Terraform (HCL + plan-JSON), **Kubernetes manifest**, and billing parsers · cross-signal normalizer · **11 detectors** (6 AWS/IaC + 5 Kubernetes) · three-tier pricing engine (committed snapshot → disk cache → live AWS Price List **Query API**, [ADR-0002](docs/adr/0002-pricing-snapshot-query-api.md)) · deterministic risk scorer · savings aggregation with per-resource dedupe · **remediation codegen** (validated Terraform/K8s patches) · bounded LLM explainer + prioritization narrative + PR description, all **validated on the LLM and template paths** ([ADR-0001](docs/adr/0001-deterministic-core-llm-explains.md)) · Markdown/PDF report export · async job queue (RQ) + Postgres persistence (SQLAlchemy + Alembic) · **GitHub App** (cost-review comments + `/cloudtrim fix` PR, HMAC-verified + idempotent) · **opt-in API-key auth + rate limiting** · **structured JSON logging, request IDs, `/metrics` (Prometheus) + LLM token/cost accounting** · Next.js dashboard (job-status polling, Recharts charts, sort/filter, colored diff drawer, empty/a11y states) · `fly.toml` + GitHub Actions CI/CD (lint · test · eval · build images · gated deploy).
+**What's in:** Terraform (HCL + plan-JSON), **Kubernetes manifest**, and billing parsers · cross-signal normalizer · **11 detectors** (6 AWS/IaC + 5 Kubernetes) · three-tier pricing engine (committed snapshot → disk cache → live AWS Price List **Query API**, [ADR-0002](docs/adr/0002-pricing-snapshot-query-api.md)) · deterministic risk scorer · savings aggregation with per-resource dedupe · **remediation codegen** (validated Terraform/K8s patches) · **cost anomaly detection** (robust median+MAD z-score) + linear forecast · bounded LLM explainer + prioritization narrative + PR description, all **validated on the LLM and template paths** ([ADR-0001](docs/adr/0001-deterministic-core-llm-explains.md)) · Markdown/PDF report export · async job queue (RQ) + Postgres persistence (SQLAlchemy + Alembic) · **GitHub App** (cost-review comments + `/cloudtrim fix` PR, HMAC-verified + idempotent) · **opt-in API-key auth + rate limiting** · **structured JSON logging, request IDs, `/metrics` (Prometheus) + LLM token/cost accounting** · Next.js dashboard (job-status polling, Recharts charts, sort/filter, colored diff drawer, empty/a11y states) · `fly.toml` + GitHub Actions CI/CD (lint · test · eval · build images · gated deploy).
 
 **Eval:** 100% detector precision / 100% recall / 100% savings accuracy across a 3-fixture benchmark (incl. a false-positive guard) — run `make eval`. Deterministic: snapshot pricing + template explainer, no network. Methodology + baseline in [`docs/eval.md`](docs/eval.md).
 
 **Runs with zero keys:** the engine is authoritative and the explainer falls back to a deterministic template, so the demo and CI work with no AWS creds and no LLM key. A key upgrades the prose; it never changes a number.
+
+## Screenshots
+
+Findings dashboard — savings hero, severity breakdown, charts, sortable/filterable findings (AWS + Kubernetes):
+
+![Dashboard](docs/img/dashboard.png)
+
+Finding-detail drawer — cost delta, architect explanation, proposed HCL change, evidence + risk factors:
+
+![Finding drawer](docs/img/finding-drawer.png)
+
+## Docs
+
+[Architecture](docs/architecture.md) · [API](docs/api.md) ([OpenAPI](docs/openapi.json)) · [Operations](docs/operations.md) · [GitHub App](docs/github-app.md) · [Eval](docs/eval.md) · ADRs ([0001](docs/adr/0001-deterministic-core-llm-explains.md), [0002](docs/adr/0002-pricing-snapshot-query-api.md)) · [Blueprint](docs/BLUEPRINT.md)
 
 ## Quickstart
 

@@ -1,0 +1,1153 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CloudTrim API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/healthz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Healthz",
+        "description": "Liveness probe.",
+        "operationId": "healthz_api_v1_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Healthz Api V1 Healthz Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses": {
+      "post": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Create Analysis",
+        "operationId": "create_analysis_api_v1_analyses_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_analysis_api_v1_analyses_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trends": {
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Get Trends",
+        "description": "Savings over time \u2014 one point per completed analysis (historical trend).",
+        "operationId": "get_trends_api_v1_trends_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response Get Trends Api V1 Trends Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/anomalies": {
+      "post": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Detect Cost Anomalies",
+        "description": "Flag cost spikes (robust z-score) + forecast from a historical cost CSV.",
+        "operationId": "detect_cost_anomalies_api_v1_anomalies_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_detect_cost_anomalies_api_v1_anomalies_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrendReport"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/anomalies/sample": {
+      "post": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Sample Anomalies",
+        "operationId": "sample_anomalies_api_v1_anomalies_sample_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrendReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses/sample": {
+      "post": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Create Sample Analysis",
+        "description": "Instant-demo: run the engine on the bundled sample dataset (no upload).",
+        "operationId": "create_sample_analysis_api_v1_analyses_sample_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses/{analysis_id}": {
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Get Analysis",
+        "operationId": "get_analysis_api_v1_analyses__analysis_id__get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses/{analysis_id}/summary": {
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Get Summary",
+        "description": "Aggregated view: realistic (deduped) vs gross savings, by-detector, top ops.",
+        "operationId": "get_summary_api_v1_analyses__analysis_id__summary_get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisAggregate"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses/{analysis_id}/narrative": {
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Get Narrative",
+        "description": "Architect-voice prioritization narrative for the whole analysis.",
+        "operationId": "get_narrative_api_v1_analyses__analysis_id__narrative_get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Narrative"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses/{analysis_id}/report.md": {
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Report Markdown",
+        "operationId": "report_markdown_api_v1_analyses__analysis_id__report_md_get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses/{analysis_id}/report.pdf": {
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Report Pdf",
+        "operationId": "report_pdf_api_v1_analyses__analysis_id__report_pdf_get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses/{analysis_id}/findings": {
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "List Findings",
+        "operationId": "list_findings_api_v1_analyses__analysis_id__findings_get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Finding"
+                  },
+                  "title": "Response List Findings Api V1 Analyses  Analysis Id  Findings Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/findings/{finding_id}": {
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Get Finding",
+        "operationId": "get_finding_api_v1_findings__finding_id__get",
+        "parameters": [
+          {
+            "name": "finding_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finding Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindingDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/github/webhook": {
+      "post": {
+        "tags": [
+          "github"
+        ],
+        "summary": "Github Webhook",
+        "operationId": "github_webhook_api_v1_github_webhook_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Github Webhook Api V1 Github Webhook Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalysisAggregate": {
+        "properties": {
+          "realistic_monthly_savings": {
+            "type": "number",
+            "title": "Realistic Monthly Savings"
+          },
+          "gross_monthly_savings": {
+            "type": "number",
+            "title": "Gross Monthly Savings"
+          },
+          "savings_by_detector": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Savings By Detector"
+          },
+          "severity_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Severity Counts"
+          },
+          "top_opportunities": {
+            "items": {
+              "$ref": "#/components/schemas/Opportunity"
+            },
+            "type": "array",
+            "title": "Top Opportunities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "realistic_monthly_savings",
+          "gross_monthly_savings",
+          "savings_by_detector",
+          "severity_counts",
+          "top_opportunities"
+        ],
+        "title": "AnalysisAggregate"
+      },
+      "AnalysisStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "running",
+          "complete",
+          "failed"
+        ],
+        "title": "AnalysisStatus"
+      },
+      "AnalysisSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AnalysisStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "total_monthly_savings": {
+            "type": "number",
+            "title": "Total Monthly Savings"
+          },
+          "findings_count": {
+            "type": "integer",
+            "title": "Findings Count"
+          },
+          "severity_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Severity Counts"
+          },
+          "source_meta": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Source Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "created_at",
+          "total_monthly_savings",
+          "findings_count",
+          "severity_counts",
+          "source_meta"
+        ],
+        "title": "AnalysisSummary"
+      },
+      "Anomaly": {
+        "properties": {
+          "service": {
+            "type": "string",
+            "title": "Service"
+          },
+          "period": {
+            "type": "string",
+            "title": "Period"
+          },
+          "expected_cost": {
+            "type": "number",
+            "title": "Expected Cost"
+          },
+          "actual_cost": {
+            "type": "number",
+            "title": "Actual Cost"
+          },
+          "deviation_pct": {
+            "type": "number",
+            "title": "Deviation Pct"
+          },
+          "z_score": {
+            "type": "number",
+            "title": "Z Score"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "service",
+          "period",
+          "expected_cost",
+          "actual_cost",
+          "deviation_pct",
+          "z_score",
+          "severity",
+          "note"
+        ],
+        "title": "Anomaly"
+      },
+      "Body_create_analysis_api_v1_analyses_post": {
+        "properties": {
+          "terraform": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terraform"
+          },
+          "billing": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Billing"
+          },
+          "kubernetes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kubernetes"
+          }
+        },
+        "type": "object",
+        "title": "Body_create_analysis_api_v1_analyses_post"
+      },
+      "Body_detect_cost_anomalies_api_v1_anomalies_post": {
+        "properties": {
+          "history": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "history"
+        ],
+        "title": "Body_detect_cost_anomalies_api_v1_anomalies_post"
+      },
+      "ExplanationSource": {
+        "type": "string",
+        "enum": [
+          "template",
+          "llm"
+        ],
+        "title": "ExplanationSource",
+        "description": "Which path produced a finding's explanation. Emitted for UI + CI assertions."
+      },
+      "Finding": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "analysis_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Id"
+          },
+          "resource_id": {
+            "type": "string",
+            "title": "Resource Id"
+          },
+          "detector": {
+            "type": "string",
+            "title": "Detector"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/Risk",
+            "default": "medium"
+          },
+          "current_cost": {
+            "type": "number",
+            "title": "Current Cost",
+            "default": 0.0
+          },
+          "projected_cost": {
+            "type": "number",
+            "title": "Projected Cost",
+            "default": 0.0
+          },
+          "monthly_savings": {
+            "type": "number",
+            "title": "Monthly Savings",
+            "default": 0.0
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Evidence"
+          },
+          "remediation_diff": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remediation Diff"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "default": 1.0
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "explanation_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExplanationSource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "resource_id",
+          "detector",
+          "title",
+          "severity"
+        ],
+        "title": "Finding",
+        "description": "A detected waste/anti-pattern on a resource, priced and risk-scored.\n\nEvery dollar figure is set by the deterministic engine (pricing). The\n`explanation`/`explanation_source` fields are populated last by the AI layer,\nwhose output is validated against `monthly_savings` regardless of source."
+      },
+      "FindingDetail": {
+        "properties": {
+          "finding": {
+            "$ref": "#/components/schemas/Finding"
+          },
+          "resource": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Resource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "finding",
+          "resource"
+        ],
+        "title": "FindingDetail"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Narrative": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ExplanationSource"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "source"
+        ],
+        "title": "Narrative"
+      },
+      "Opportunity": {
+        "properties": {
+          "finding_id": {
+            "type": "string",
+            "title": "Finding Id"
+          },
+          "detector": {
+            "type": "string",
+            "title": "Detector"
+          },
+          "resource_identifier": {
+            "type": "string",
+            "title": "Resource Identifier"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          },
+          "risk": {
+            "type": "string",
+            "title": "Risk"
+          },
+          "monthly_savings": {
+            "type": "number",
+            "title": "Monthly Savings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "finding_id",
+          "detector",
+          "resource_identifier",
+          "title",
+          "severity",
+          "risk",
+          "monthly_savings"
+        ],
+        "title": "Opportunity"
+      },
+      "Provider": {
+        "type": "string",
+        "enum": [
+          "aws",
+          "k8s"
+        ],
+        "title": "Provider"
+      },
+      "Resource": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "analysis_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceType",
+            "default": "other"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/Provider",
+            "default": "aws"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "identifier": {
+            "type": "string",
+            "title": "Identifier"
+          },
+          "instance_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instance Type"
+          },
+          "monthly_cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Monthly Cost"
+          },
+          "utilization": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utilization"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Tags"
+          },
+          "raw": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Raw"
+          }
+        },
+        "type": "object",
+        "required": [
+          "identifier"
+        ],
+        "title": "Resource",
+        "description": "A cloud resource, normalized from IaC config and/or billing data."
+      },
+      "ResourceType": {
+        "type": "string",
+        "enum": [
+          "ec2",
+          "rds",
+          "s3",
+          "ebs",
+          "k8s_workload",
+          "k8s_service",
+          "other"
+        ],
+        "title": "ResourceType",
+        "description": "Normalized resource type. `raw` retains the source-specific type string."
+      },
+      "Risk": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "title": "Risk",
+        "description": "Deterministic rollout risk of applying a finding's remediation."
+      },
+      "SeriesPoint": {
+        "properties": {
+          "period": {
+            "type": "string",
+            "title": "Period"
+          },
+          "cost": {
+            "type": "number",
+            "title": "Cost"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "cost"
+        ],
+        "title": "SeriesPoint"
+      },
+      "Severity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "title": "Severity"
+      },
+      "TrendReport": {
+        "properties": {
+          "anomalies": {
+            "items": {
+              "$ref": "#/components/schemas/Anomaly"
+            },
+            "type": "array",
+            "title": "Anomalies"
+          },
+          "forecast_by_service": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Forecast By Service"
+          },
+          "forecast_total": {
+            "type": "number",
+            "title": "Forecast Total"
+          },
+          "series": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/SeriesPoint"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Series"
+          }
+        },
+        "type": "object",
+        "required": [
+          "anomalies",
+          "forecast_by_service",
+          "forecast_total",
+          "series"
+        ],
+        "title": "TrendReport"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

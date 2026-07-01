@@ -288,26 +288,26 @@ Finding(id, analysis_id, resource_id, detector, severity, risk, current_cost,
 **Objective:** make it demo-perfect and interview-ready.
 
 **Backend**
-- [ ] Pick **one** stretch: (a) cost anomaly detection on historical CUR, (b) next-month forecast, or (c) live AWS **read-only** connector (Cost Explorer/CUR)
+- [x] Pick **one** stretch: (a) cost anomaly detection on historical CUR, (b) next-month forecast, or (c) live AWS **read-only** connector (Cost Explorer/CUR)
 
 **Frontend**
-- [ ] Polished landing + demo walkthrough, seeded "wow" dataset
+- [x] Polished landing + demo walkthrough, seeded "wow" dataset
 
 **AI**
 - [ ] Optional: agentic "investigate this resource" multi-step mode (stretch)
 
 **Infrastructure**
-- [ ] Architecture diagram(s) in repo
+- [x] Architecture diagram(s) in repo
 
 **Testing**
-- [ ] Final eval run; publish precision/recall + savings-accuracy numbers in README
+- [x] Final eval run; publish precision/recall + savings-accuracy numbers in README
 
 **Documentation**
-- [ ] Full README, API docs (OpenAPI), architecture docs, ADRs, demo video/GIF
-- [ ] `docs/interview-notes.md` (your own talking points)
+- [x] Full README, API docs (OpenAPI), architecture docs, ADRs, demo video/GIF
+- [x] `docs/interview-notes.md` (your own talking points)
 
 **Deployment**
-- [ ] Tagged v1.0 release
+- [x] Tagged v1.0 release
 
 **Resume improvement (final headline bullet):** *"CloudTrim — a shift-left cloud cost optimizer that analyzes Terraform, Kubernetes, and billing data with a deterministic engine, prices savings against live AWS pricing, risk-scores changes, and opens explained fix PRs; async worker architecture, GitHub App integration, eval harness (P/R reported), full CI/CD."*
 
