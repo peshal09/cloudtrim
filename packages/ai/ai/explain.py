@@ -19,6 +19,7 @@ from engine.models import ExplanationSource, Finding, Resource
 from ai.cache import cache, finding_key
 from ai.config import AIConfig
 from ai.templates import render_template
+from ai.usage import record_response
 from ai.validation import validate_explanation
 
 _SYSTEM = (
@@ -106,14 +107,18 @@ def _try_llm(
     client_factory: Callable[[AIConfig], object] | None,
 ) -> str | None:
     """Best-effort LLM call. Returns None on any failure (pipeline never fails)."""
+    prompt = _build_prompt(finding, resource)
+    if len(prompt) > config.max_prompt_chars:  # guardrail: don't send an oversized prompt
+        return None
     try:
         client = client_factory(config) if client_factory else _default_client(config)
         resp = client.messages.create(
             model=config.model,
             max_tokens=config.max_tokens,
             system=_SYSTEM,
-            messages=[{"role": "user", "content": _build_prompt(finding, resource)}],
+            messages=[{"role": "user", "content": prompt}],
         )
+        record_response(resp)  # token/cost accounting
         if getattr(resp, "stop_reason", None) == "refusal":
             return None
         text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")

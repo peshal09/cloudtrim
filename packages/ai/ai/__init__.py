@@ -10,6 +10,7 @@ from ai.explain import explain_finding, make_explainer
 from ai.narrative import Narrative, prioritize_analysis
 from ai.pr_description import PRDescription, describe_pr
 from ai.templates import render_template
+from ai.usage import usage
 from ai.validation import validate_explanation
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "make_explainer",
     "prioritize_analysis",
     "render_template",
+    "usage",
     "validate_explanation",
 ]

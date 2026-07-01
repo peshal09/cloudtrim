@@ -85,8 +85,25 @@ class Metrics:
 metrics = Metrics()
 
 
+def _llm_metrics() -> str:
+    from ai import usage
+
+    return (
+        "# TYPE cloudtrim_llm_calls_total counter\n"
+        f"cloudtrim_llm_calls_total {usage.calls}\n"
+        "# TYPE cloudtrim_llm_input_tokens_total counter\n"
+        f"cloudtrim_llm_input_tokens_total {usage.input_tokens}\n"
+        "# TYPE cloudtrim_llm_output_tokens_total counter\n"
+        f"cloudtrim_llm_output_tokens_total {usage.output_tokens}\n"
+        "# TYPE cloudtrim_llm_estimated_cost_usd gauge\n"
+        f"cloudtrim_llm_estimated_cost_usd {usage.estimated_cost_usd}\n"
+    )
+
+
 async def metrics_endpoint(_: Request) -> PlainTextResponse:
-    return PlainTextResponse(metrics.render(), media_type="text/plain; version=0.0.4")
+    return PlainTextResponse(
+        metrics.render() + _llm_metrics(), media_type="text/plain; version=0.0.4"
+    )
 
 
 # --- middleware --------------------------------------------------------------

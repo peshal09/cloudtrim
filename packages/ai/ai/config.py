@@ -17,6 +17,7 @@ class AIConfig:
     model: str = "LLM-opus-4-8"
     max_tokens: int = 1024
     max_retries: int = 2
+    max_prompt_chars: int = 20_000  # guardrail: skip the LLM on oversized prompts
 
     @property
     def enabled(self) -> bool:
