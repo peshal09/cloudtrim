@@ -253,27 +253,27 @@ Finding(id, analysis_id, resource_id, detector, severity, risk, current_cost,
 **Objective:** make it look and behave like production software.
 
 **Backend**
-- [ ] AuthN (API keys / OAuth), rate limiting, input validation + size limits
-- [ ] Structured logging (JSON), request IDs, error taxonomy
-- [ ] Metrics endpoint (Prometheus-style counters/latency)
-- [ ] Caching layer (pricing + LLM) with TTLs
+- [x] AuthN (API keys / OAuth), rate limiting, input validation + size limits
+- [x] Structured logging (JSON), request IDs, error taxonomy
+- [x] Metrics endpoint (Prometheus-style counters/latency)
+- [x] Caching layer (pricing + LLM) with TTLs
 
 **Frontend**
-- [ ] Loading/error states, empty states, accessibility pass
+- [x] Loading/error states, empty states, accessibility pass
 
 **AI**
-- [ ] Token/cost accounting + guardrail on prompt size
+- [x] Token/cost accounting + guardrail on prompt size
 
 **Infrastructure**
-- [ ] Full Docker Compose (api, worker, web, redis, postgres)
+- [x] Full Docker Compose (api, worker, web, redis, postgres)
 - [ ] Deploy to Fly.io / Render / AWS ECS
-- [ ] **GitHub Actions CI/CD**: lint, test, eval, build images, deploy
+- [x] **GitHub Actions CI/CD**: lint, test, eval, build images, deploy
 
 **Testing**
-- [ ] Integration/e2e happy-path; load smoke test on the queue
+- [x] Integration/e2e happy-path; load smoke test on the queue
 
 **Documentation**
-- [ ] `docs/operations.md` (runbook, config, scaling notes)
+- [x] `docs/operations.md` (runbook, config, scaling notes)
 
 **Deployment**
 - [ ] Public demo URL
