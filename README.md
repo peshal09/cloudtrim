@@ -21,7 +21,13 @@ The **engine is authoritative; the LLM is a narrator.** Parsing, detection, pric
 
 ## Status
 
-🚧 **Scaffold.** Structure, tooling, and a health endpoint are in place; feature work (parsers, detectors, pricing, AI explainer, dashboard) begins with the Week 1 MVP. See [`docs/BLUEPRINT.md`](docs/BLUEPRINT.md) for the full spec and six-week roadmap.
+✅ **Week 1 MVP complete** — the full flow works end-to-end: upload Terraform + billing CSV → parse → normalize (cross-signal join) → detect (6 anti-patterns) → price → risk-score → explain → dashboard. Next: Week 2 (savings aggregation, report export, eval harness expansion). See [`docs/BLUEPRINT.md`](docs/BLUEPRINT.md) for the full spec and six-week roadmap.
+
+**What's in:** Terraform (HCL + plan-JSON) and billing parsers · normalizer · 6 detectors (idle EC2, overprovisioned RDS, oversized EC2, missing S3 lifecycle, governance, orphaned resource) · three-tier pricing engine (committed snapshot → disk cache → live AWS Price List **Query API**, [ADR-0002](docs/adr/0002-pricing-snapshot-query-api.md)) · deterministic risk scorer · bounded LLM explainer with **validation on both the LLM and template paths** ([ADR-0001](docs/adr/0001-deterministic-core-llm-explains.md)) · REST API · Next.js dashboard.
+
+**Eval (labeled demo fixture):** 100% detector precision / 100% recall / 100% savings accuracy, $494.50/mo identified — run `make eval`. Deterministic: snapshot pricing + template explainer, no network.
+
+**Runs with zero keys:** the engine is authoritative and the explainer falls back to a deterministic template, so the demo and CI work with no AWS creds and no LLM key. A key upgrades the prose; it never changes a number.
 
 ## Quickstart
 
@@ -30,6 +36,7 @@ The **engine is authoritative; the LLM is a narrator.** Parsing, detection, pric
 ```bash
 make install        # pip install -e ".[dev]"
 make test           # pytest
+make eval           # score detectors on labeled fixtures (precision/recall)
 make run            # uvicorn -> http://localhost:8000/api/v1/healthz
 ```
 
@@ -40,6 +47,9 @@ cd apps/web
 npm install
 npm run dev         # http://localhost:3000
 ```
+
+Open the web app and click **Load sample data** for an instant demo (no upload,
+no keys), or upload your own `.tf` + billing CSV.
 
 **Or via Docker Compose:**
 
@@ -53,7 +63,7 @@ docker compose up --build   # api :8000, web :3000
 ```
 apps/{api,worker,web}   # FastAPI edge · async worker (Week 3) · Next.js UI
 packages/{engine,ai}    # deterministic engine · bounded LLM layer
-eval/                   # labeled fixtures + precision/recall harness (Week 2)
+eval/                   # labeled fixtures + ground truth + precision/recall harness
 infra/  docs/           # deploy manifests · spec, ADRs, architecture
 ```
 

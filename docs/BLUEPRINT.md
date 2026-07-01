@@ -108,35 +108,35 @@ Finding(id, analysis_id, resource_id, detector, severity, risk, current_cost,
 **Objective:** deterministic Terraform + billing analysis with priced findings and a dashboard.
 
 **Backend**
-- [ ] FastAPI skeleton, `/api/v1` router, health check, settings via env
-- [ ] Terraform parser (`terraform show -json` primary, `python-hcl2` fallback) → normalized `Resource`
-- [ ] Billing CSV parser → `Resource` cost/utilization enrichment
-- [ ] `Normalizer` merging config + billing into a unified ResourceModel (join by id/tags)
-- [ ] Detector interface + 6 MVP detectors in a registry
-- [ ] Pricing engine v1 (AWS Price List bulk JSON, cached) → savings math
+- [x] FastAPI skeleton, `/api/v1` router, health check, settings via env
+- [x] Terraform parser (`terraform show -json` primary, `python-hcl2` fallback) → normalized `Resource`
+- [x] Billing CSV parser → `Resource` cost/utilization enrichment
+- [x] `Normalizer` merging config + billing into a unified ResourceModel (join by id/tags)
+- [x] Detector interface + 6 MVP detectors in a registry
+- [x] Pricing engine v1 (AWS Price List bulk JSON, cached) → savings math
 
 **Frontend**
-- [ ] Upload page + sample-data demo mode
-- [ ] Findings dashboard (savings hero, severity breakdown, table)
-- [ ] Finding detail drawer
+- [x] Upload page + sample-data demo mode
+- [x] Findings dashboard (savings hero, severity breakdown, table)
+- [x] Finding detail drawer
 
 **AI**
-- [ ] `explain_finding()` grounded call + output validation (numbers must match engine)
-- [ ] Retry/fallback + response cache
+- [x] `explain_finding()` grounded call + output validation (numbers must match engine)
+- [x] Retry/fallback + response cache
 
 **Infrastructure**
-- [ ] Local run via Docker Compose (api + web); `.env.example`
+- [x] Local run via Docker Compose (api + web); `.env.example`
 
 **Testing**
-- [ ] Unit tests for each detector against fixture inputs
-- [ ] Pricing engine tests (known instance → known price)
+- [x] Unit tests for each detector against fixture inputs
+- [x] Pricing engine tests (known instance → known price)
 
 **Documentation**
-- [ ] README quickstart + sample data
-- [ ] `docs/adr/0001-deterministic-core-llm-explains.md`
+- [x] README quickstart + sample data
+- [x] `docs/adr/0001-deterministic-core-llm-explains.md`
 
 **Deployment**
-- [ ] Runs locally with one command
+- [x] Runs locally with one command
 
 **Resume improvement:** *"Built a deterministic cloud-cost analysis engine that parses Terraform and billing data, detects six classes of infrastructure waste, and prices remediation savings against the live AWS Price List API."*
 
