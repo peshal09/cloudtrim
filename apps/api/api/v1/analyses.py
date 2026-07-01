@@ -1,18 +1,23 @@
-"""Analysis endpoints (BLUEPRINT.md §2). Synchronous for the MVP — the engine runs
-in-request; Week 3 moves it behind an async job queue.
+"""Analysis endpoints (BLUEPRINT.md §2/§3).
+
+Dual-mode: when a Redis + database are configured the upload enqueues a job and
+returns a pending analysis to poll; otherwise the engine runs in-request against the
+in-memory store (the zero-dependency demo path).
 """
 
 from __future__ import annotations
 
+import uuid
 from typing import Annotated
 
 from ai import Narrative, make_explainer, prioritize_analysis
 from engine.aggregate import AnalysisAggregate
 from engine.models import Finding
-from engine.pipeline import AnalysisResult, analyze
+from engine.pipeline import AnalysisResult, analyze, pending_result
 from fastapi import APIRouter, File, HTTPException, Response, UploadFile
 
 from api import report
+from api.jobs import async_enabled, enqueue_analysis, get_queue
 from api.sample_data import SAMPLE_CSV, SAMPLE_K8S, SAMPLE_TF
 from api.store import store
 from api.v1.schemas import AnalysisSummary, FindingDetail
@@ -46,20 +51,34 @@ async def create_analysis(
     tf_text = await _read_text(terraform) if terraform is not None else None
     csv_text = await _read_text(billing) if billing is not None else None
     k8s_text = await _read_text(kubernetes) if kubernetes is not None else None
+    meta = {
+        "terraform": terraform.filename if terraform else None,
+        "billing": billing.filename if billing else None,
+        "kubernetes": kubernetes.filename if kubernetes else None,
+    }
+
+    if async_enabled():
+        # Enqueue: persist a pending record, return immediately; the worker fills it in.
+        analysis_id = uuid.uuid4().hex
+        store.save(pending_result(analysis_id, meta))
+        enqueue_analysis(get_queue(), analysis_id, tf_text, csv_text, k8s_text, meta)
+        return AnalysisSummary.from_result(store.get(analysis_id))
 
     result = analyze(
         explain=_explain,
         terraform_source=tf_text,
         billing_source=csv_text,
         kubernetes_source=k8s_text,
-        source_meta={
-            "terraform": terraform.filename if terraform else None,
-            "billing": billing.filename if billing else None,
-            "kubernetes": kubernetes.filename if kubernetes else None,
-        },
+        source_meta=meta,
     )
     store.save(result)
     return AnalysisSummary.from_result(result)
+
+
+@router.get("/trends")
+def get_trends() -> list[dict]:
+    """Savings over time — one point per completed analysis (historical trend)."""
+    return store.trend()
 
 
 @router.post("/analyses/sample", status_code=201, response_model=AnalysisSummary)

@@ -33,6 +33,14 @@ def test_summary_endpoint_returns_aggregate():
     assert summary["savings_by_detector"]["overprovisioned_rds"] == 124.83
 
 
+def test_trends_endpoint_lists_savings_over_time():
+    client.post("/api/v1/analyses/sample")
+    trends = client.get("/api/v1/trends").json()
+    assert len(trends) >= 1
+    assert trends[-1]["total_monthly_savings"] == 494.50
+    assert "created_at" in trends[-1]
+
+
 def test_narrative_endpoint_prioritizes_via_template():
     analysis_id = client.post("/api/v1/analyses/sample").json()["id"]
     n = client.get(f"/api/v1/analyses/{analysis_id}/narrative").json()

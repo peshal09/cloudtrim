@@ -31,16 +31,33 @@ class AnalysisResult:
     aggregate: AnalysisAggregate
 
 
+def pending_result(analysis_id: str, source_meta: dict | None = None) -> AnalysisResult:
+    """A queued/not-yet-run analysis, persisted so the client can poll for status."""
+    return AnalysisResult(
+        analysis=Analysis(
+            id=analysis_id,
+            status=AnalysisStatus.PENDING,
+            source_meta=dict(source_meta or {}),
+        ),
+        resources=[],
+        findings=[],
+        aggregate=aggregate([], []),
+    )
+
+
 def analyze(
     terraform_source: str | None = None,
     billing_source: str | None = None,
     kubernetes_source: str | None = None,
+    analysis_id: str | None = None,
     ctx: DetectContext | None = None,
     pricing_client: PricingClient | None = None,
     explain: Explainer | None = None,
     source_meta: dict | None = None,
 ) -> AnalysisResult:
     analysis = Analysis(status=AnalysisStatus.RUNNING, source_meta=dict(source_meta or {}))
+    if analysis_id is not None:
+        analysis.id = analysis_id
 
     config: list[Resource] = []
     if terraform_source:
