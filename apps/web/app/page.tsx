@@ -40,6 +40,7 @@ export default function UploadPage() {
         <input
           type="file"
           accept=".tf,.json"
+          aria-label="Terraform file"
           onChange={(e) => setTf(e.target.files?.[0] ?? null)}
           className="mt-1 block w-full text-sm"
         />
@@ -50,6 +51,7 @@ export default function UploadPage() {
         <input
           type="file"
           accept=".yaml,.yml"
+          aria-label="Kubernetes manifests"
           onChange={(e) => setK8s(e.target.files?.[0] ?? null)}
           className="mt-1 block w-full text-sm"
         />
@@ -60,6 +62,7 @@ export default function UploadPage() {
         <input
           type="file"
           accept=".csv"
+          aria-label="Billing CSV"
           onChange={(e) => setCsv(e.target.files?.[0] ?? null)}
           className="mt-1 block w-full text-sm"
         />
@@ -85,7 +88,11 @@ export default function UploadPage() {
           Load sample data
         </button>
 
-        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="mt-4 text-sm text-red-600">
+            {error}
+          </p>
+        )}
       </div>
 
       {/* GitHub App — shift-left in code review (mocked "connect a repo" demo) */}

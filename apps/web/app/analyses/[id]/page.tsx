@@ -96,7 +96,11 @@ export default function DashboardPage() {
   if (summary.status !== "complete") {
     return (
       <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 p-8 text-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-300 border-t-gray-900" />
+        <div
+          role="status"
+          aria-label={`Analysis ${summary.status}`}
+          className="h-10 w-10 animate-spin rounded-full border-2 border-gray-300 border-t-gray-900"
+        />
         <p className="text-lg font-medium capitalize">{summary.status}…</p>
         <p className="text-sm text-gray-500">
           Your analysis is queued on the worker. This page will update automatically.
@@ -201,18 +205,31 @@ export default function DashboardPage() {
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-50 text-gray-600">
             <tr>
-              <th className="px-4 py-2">Finding</th>
+              <th scope="col" className="px-4 py-2">
+                Finding
+              </th>
               <SortHead label="Severity" k="severity" sortKey={sortKey} set={setSortKey} />
               <SortHead label="Risk" k="risk" sortKey={sortKey} set={setSortKey} />
               <SortHead label="Savings/mo" k="savings" sortKey={sortKey} set={setSortKey} />
             </tr>
           </thead>
           <tbody>
+            {visible.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-4 py-10 text-center text-gray-500">
+                  {findings.length === 0
+                    ? "✅ No cost issues found."
+                    : "No findings match the current filters."}
+                </td>
+              </tr>
+            )}
             {visible.map((f) => (
               <tr
                 key={f.id}
                 onClick={() => getFinding(f.id).then(setSelected)}
-                className="cursor-pointer border-t border-gray-100 hover:bg-gray-50"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && getFinding(f.id).then(setSelected)}
+                className="cursor-pointer border-t border-gray-100 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
               >
                 <td className="px-4 py-3">
                   <div className="font-medium text-gray-900">{f.title}</div>
@@ -279,7 +296,9 @@ function SortHead({
 }) {
   return (
     <th
+      scope="col"
       onClick={() => set(k)}
+      aria-sort={sortKey === k ? "descending" : "none"}
       className={`cursor-pointer select-none px-4 py-2 ${
         sortKey === k ? "text-gray-900" : ""
       }`}
@@ -305,7 +324,11 @@ function Drawer({
       >
         <div className="flex items-start justify-between">
           <h2 className="text-lg font-semibold">{finding.title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700">
+          <button
+            onClick={onClose}
+            aria-label="Close finding details"
+            className="text-gray-400 hover:text-gray-700"
+          >
             ✕
           </button>
         </div>
