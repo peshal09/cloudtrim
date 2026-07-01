@@ -87,6 +87,32 @@ export default function UploadPage() {
 
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
       </div>
+
+      {/* GitHub App — shift-left in code review (mocked "connect a repo" demo) */}
+      <details className="rounded-xl border border-gray-200 p-5 text-sm">
+        <summary className="cursor-pointer font-medium text-gray-800">
+          Connect a repository — review cost in pull requests
+        </summary>
+        <div className="mt-3 space-y-2 text-gray-600">
+          <p>
+            CloudTrim ships as a GitHub App. On any PR touching{" "}
+            <code>.tf</code>, it analyzes the change and comments the cost impact and
+            waste — then, on <code>/cloudtrim fix</code>, opens a ready-to-merge PR
+            that rightsizes the resources.
+          </p>
+          <ol className="list-decimal space-y-1 pl-5">
+            <li>Install the CloudTrim GitHub App on your repo.</li>
+            <li>
+              Point the webhook at <code>/api/v1/github/webhook</code> with your
+              signing secret.
+            </li>
+            <li>Open a PR — CloudTrim reviews it automatically.</li>
+          </ol>
+          <p className="text-gray-400">
+            Setup guide: <code>docs/github-app.md</code>.
+          </p>
+        </div>
+      </details>
     </main>
   );
 }

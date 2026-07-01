@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Badge } from "../../components/badges";
 import { Charts } from "../../components/charts";
+import { DiffView } from "../../components/diff";
 import {
   AnalysisAggregate,
   AnalysisSummary,
@@ -341,9 +342,7 @@ function Drawer({
 
         {finding.remediation_diff && (
           <Section title="Proposed change">
-            <pre className="overflow-x-auto rounded-lg bg-gray-900 p-3 text-xs text-gray-100">
-              {finding.remediation_diff}
-            </pre>
+            <DiffView diff={finding.remediation_diff} />
           </Section>
         )}
 
