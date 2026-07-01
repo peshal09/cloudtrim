@@ -148,30 +148,30 @@ Finding(id, analysis_id, resource_id, detector, severity, risk, current_cost,
 **Objective:** make the output trustworthy and shippable as a report.
 
 **Backend**
-- [ ] Deterministic risk scorer (blast radius, statefulness, reversibility, env-from-tags)
-- [ ] Savings summary aggregation endpoint
-- [ ] Report export (Markdown + PDF)
+- [x] Deterministic risk scorer (blast radius, statefulness, reversibility, env-from-tags)
+- [x] Savings summary aggregation endpoint
+- [x] Report export (Markdown + PDF)
 
 **Frontend**
-- [ ] Risk badges + sorting/filtering by severity, risk, savings
-- [ ] "Export report" action
+- [x] Risk badges + sorting/filtering by severity, risk, savings
+- [x] "Export report" action
 
 **AI**
-- [ ] Architect-voice prioritization narrative for the whole analysis (top opportunities)
-- [ ] Prompt regression tests (golden outputs)
+- [x] Architect-voice prioritization narrative for the whole analysis (top opportunities)
+- [x] Prompt regression tests (golden outputs)
 
 **Infrastructure**
-- [ ] Config for pricing snapshot caching
+- [x] Config for pricing snapshot caching
 
 **Testing**
-- [ ] **Eval harness v1**: benchmark repo of known-waste fixtures with ground-truth findings; measure detector **precision/recall** and pricing accuracy
-- [ ] CI runs unit + eval on every push
+- [x] **Eval harness v1**: benchmark repo of known-waste fixtures with ground-truth findings; measure detector **precision/recall** and pricing accuracy
+- [x] CI runs unit + eval on every push
 
 **Documentation**
-- [ ] `docs/eval.md` explaining metrics + baseline numbers
+- [x] `docs/eval.md` explaining metrics + baseline numbers
 
 **Deployment**
-- [ ] Dockerfile for api + worker image
+- [x] Dockerfile for api + worker image
 
 **Resume improvement:** *"Designed a deterministic risk-scoring model and an offline eval harness measuring recommendation precision/recall on a labeled benchmark, keeping the LLM strictly to explanation (numbers validated against the engine)."*
 
