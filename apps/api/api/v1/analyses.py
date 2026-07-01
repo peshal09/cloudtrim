@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from ai import make_explainer
+from engine.aggregate import AnalysisAggregate
 from engine.models import Finding
 from engine.pipeline import analyze
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -73,6 +74,15 @@ def get_analysis(analysis_id: str) -> AnalysisSummary:
     if result is None:
         raise HTTPException(status_code=404, detail="analysis not found")
     return AnalysisSummary.from_result(result)
+
+
+@router.get("/analyses/{analysis_id}/summary", response_model=AnalysisAggregate)
+def get_summary(analysis_id: str) -> AnalysisAggregate:
+    """Aggregated view: realistic (deduped) vs gross savings, by-detector, top ops."""
+    result = store.get(analysis_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="analysis not found")
+    return result.aggregate
 
 
 @router.get("/analyses/{analysis_id}/findings", response_model=list[Finding])

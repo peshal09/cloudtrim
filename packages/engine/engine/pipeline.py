@@ -11,6 +11,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
+from engine.aggregate import AnalysisAggregate, aggregate
 from engine.detectors import DetectContext, run_detectors
 from engine.models import Analysis, AnalysisStatus, Finding, Resource
 from engine.normalizer import normalize
@@ -27,6 +28,7 @@ class AnalysisResult:
     analysis: Analysis
     resources: list[Resource]
     findings: list[Finding]
+    aggregate: AnalysisAggregate
 
 
 def analyze(
@@ -52,7 +54,9 @@ def analyze(
         for finding in findings:
             explain(finding, by_id.get(finding.resource_id))
 
-    analysis.total_monthly_savings = round(sum(f.monthly_savings for f in findings), 2)
+    agg = aggregate(findings, resources)
+    # Honest headline: the deduped, realizable total (not the naive sum).
+    analysis.total_monthly_savings = agg.realistic_monthly_savings
     analysis.source_meta.update(
         {
             "config_resources": len(config),
@@ -62,4 +66,4 @@ def analyze(
         }
     )
     analysis.status = AnalysisStatus.COMPLETE
-    return AnalysisResult(analysis=analysis, resources=resources, findings=findings)
+    return AnalysisResult(analysis=analysis, resources=resources, findings=findings, aggregate=agg)

@@ -23,6 +23,16 @@ def test_sample_endpoint_runs_the_demo_dataset():
     assert body["findings_count"] == 6
 
 
+def test_summary_endpoint_returns_aggregate():
+    analysis_id = client.post("/api/v1/analyses/sample").json()["id"]
+    summary = client.get(f"/api/v1/analyses/{analysis_id}/summary").json()
+    # Demo has no overlapping remediations, so realistic == gross.
+    assert summary["realistic_monthly_savings"] == 494.50
+    assert summary["gross_monthly_savings"] == 494.50
+    assert summary["top_opportunities"][0]["detector"] == "oversized_ec2"
+    assert summary["savings_by_detector"]["overprovisioned_rds"] == 124.83
+
+
 def test_sample_findings_are_explained_via_template():
     analysis_id = client.post("/api/v1/analyses/sample").json()["id"]
     findings = client.get(f"/api/v1/analyses/{analysis_id}/findings").json()
