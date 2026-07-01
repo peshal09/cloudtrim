@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Badge } from "../../components/badges";
+import { Charts } from "../../components/charts";
 import {
+  AnalysisAggregate,
   AnalysisSummary,
   Finding,
   FindingDetail,
@@ -14,6 +16,7 @@ import {
   getAnalysis,
   getFinding,
   getNarrative,
+  getSummary,
   listFindings,
   money,
   reportUrl,
@@ -27,6 +30,7 @@ export default function DashboardPage() {
   const [summary, setSummary] = useState<AnalysisSummary | null>(null);
   const [findings, setFindings] = useState<Finding[]>([]);
   const [narrative, setNarrative] = useState<Narrative | null>(null);
+  const [aggregate, setAggregate] = useState<AnalysisAggregate | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("savings");
   const [sevFilter, setSevFilter] = useState<"all" | Severity>("all");
   const [riskFilter, setRiskFilter] = useState<"all" | Risk>("all");
@@ -35,13 +39,37 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([getAnalysis(id), listFindings(id), getNarrative(id)])
-      .then(([s, f, n]) => {
+    let timer: ReturnType<typeof setTimeout>;
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const s = await getAnalysis(id);
+        if (cancelled) return;
         setSummary(s);
+        if (s.status !== "complete") {
+          timer = setTimeout(load, 1500); // poll while the worker runs
+          return;
+        }
+        const [f, n, agg] = await Promise.all([
+          listFindings(id),
+          getNarrative(id),
+          getSummary(id),
+        ]);
+        if (cancelled) return;
         setFindings(f);
         setNarrative(n);
-      })
-      .catch((e) => setError(e instanceof Error ? e.message : "Load failed"));
+        setAggregate(agg);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Load failed");
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [id]);
 
   const visible = useMemo(() => {
@@ -63,6 +91,18 @@ export default function DashboardPage() {
   if (error)
     return <main className="p-8 text-red-600">Error: {error}</main>;
   if (!summary) return <main className="p-8 text-gray-500">Loading…</main>;
+
+  if (summary.status !== "complete") {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center gap-4 p-8 text-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-300 border-t-gray-900" />
+        <p className="text-lg font-medium capitalize">{summary.status}…</p>
+        <p className="text-sm text-gray-500">
+          Your analysis is queued on the worker. This page will update automatically.
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-5xl p-8">
@@ -126,6 +166,9 @@ export default function DashboardPage() {
           </p>
         </section>
       )}
+
+      {/* Charts */}
+      {aggregate && <Charts aggregate={aggregate} />}
 
       {/* Filters */}
       <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">

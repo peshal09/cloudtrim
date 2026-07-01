@@ -52,6 +52,20 @@ export interface Narrative {
   source: "template" | "llm";
 }
 
+export interface AnalysisAggregate {
+  realistic_monthly_savings: number;
+  gross_monthly_savings: number;
+  savings_by_detector: Record<string, number>;
+  severity_counts: Record<string, number>;
+  top_opportunities: unknown[];
+}
+
+export interface TrendPoint {
+  id: string;
+  created_at: string;
+  total_monthly_savings: number;
+}
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
   return res.json() as Promise<T>;
@@ -94,6 +108,12 @@ export function getFinding(id: string): Promise<FindingDetail> {
 export function getNarrative(id: string): Promise<Narrative> {
   return fetch(`${API_URL}/api/v1/analyses/${id}/narrative`).then(
     json<Narrative>,
+  );
+}
+
+export function getSummary(id: string): Promise<AnalysisAggregate> {
+  return fetch(`${API_URL}/api/v1/analyses/${id}/summary`).then(
+    json<AnalysisAggregate>,
   );
 }
 
