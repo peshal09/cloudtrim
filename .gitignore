@@ -30,3 +30,6 @@ apps/web/next-env.d.ts
 
 # Caches (pricing snapshots, LLM responses) — added in later weeks
 .cache/
+
+# Private notes (kept local, not published)
+docs/interview-notes.md

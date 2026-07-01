@@ -1,5 +1,7 @@
 # CloudTrim
 
+[![CI](https://github.com/peshal09/cloudtrim/actions/workflows/ci.yml/badge.svg)](https://github.com/peshal09/cloudtrim/actions/workflows/ci.yml)
+
 > **A shift-left cloud cost optimizer that reviews your Terraform, Kubernetes manifests, and billing data like a senior cloud architect** — detecting waste and anti-patterns with a deterministic engine, pricing the impact against live cloud pricing, and opening explained, risk-scored, ready-to-merge fix PRs in CI.
 
 Not a dashboard. A **reviewer that remediates.**
