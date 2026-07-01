@@ -1,0 +1,47 @@
+[project]
+name = "cloudtrim"
+version = "0.1.0"
+description = "Shift-left cloud cost optimizer — deterministic engine, LLM narrates."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "python-multipart>=0.0.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "httpx>=0.27",
+    "ruff>=0.7",
+    "black>=24.10",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+# Scaffold: packages are imported via pytest pythonpath / PYTHONPATH rather than
+# installed, so no package discovery is configured yet.
+[tool.setuptools]
+py-modules = []
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["apps/web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+extend-exclude = "apps/web"
+
+[tool.pytest.ini_options]
+testpaths = ["apps", "packages", "eval"]
+pythonpath = ["apps/api", "apps/worker", "packages/engine", "packages/ai"]
+addopts = "-ra"
