@@ -66,6 +66,30 @@ export interface TrendPoint {
   total_monthly_savings: number;
 }
 
+export interface Anomaly {
+  service: string;
+  period: string;
+  expected_cost: number;
+  actual_cost: number;
+  deviation_pct: number;
+  z_score: number;
+  severity: "high" | "medium";
+  note: string;
+}
+
+export interface TrendReport {
+  anomalies: Anomaly[];
+  forecast_by_service: Record<string, number>;
+  forecast_total: number;
+  series: Record<string, { period: string; cost: number }[]>;
+}
+
+export function sampleAnomalies(): Promise<TrendReport> {
+  return fetch(`${API_URL}/api/v1/anomalies/sample`, { method: "POST" }).then(
+    json<TrendReport>,
+  );
+}
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
   return res.json() as Promise<T>;

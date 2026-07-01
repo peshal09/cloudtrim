@@ -33,10 +33,16 @@ class Anomaly(BaseModel):
     note: str
 
 
+class SeriesPoint(BaseModel):
+    period: str
+    cost: float
+
+
 class TrendReport(BaseModel):
     anomalies: list[Anomaly]
     forecast_by_service: dict[str, float]
     forecast_total: float
+    series: dict[str, list[SeriesPoint]]  # per-service history, for charting
 
 
 def parse_cost_history(source: str | Path) -> dict[str, list[tuple[str, float]]]:
@@ -112,10 +118,14 @@ def forecast_next(history: dict[str, list[tuple[str, float]]]) -> tuple[dict[str
 def analyze_trends(source: str | Path) -> TrendReport:
     history = parse_cost_history(source)
     by_service, total = forecast_next(history)
+    series = {
+        svc: [SeriesPoint(period=p, cost=c) for p, c in points] for svc, points in history.items()
+    }
     return TrendReport(
         anomalies=detect_anomalies(history),
         forecast_by_service=by_service,
         forecast_total=total,
+        series=series,
     )
 
 

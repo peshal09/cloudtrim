@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createAnalysis, loadSample } from "./lib/api";
@@ -31,6 +32,12 @@ export default function UploadPage() {
         <p className="mt-2 text-gray-600">
           Shift-left cloud cost optimizer — a reviewer that remediates.
         </p>
+        <Link
+          href="/trends"
+          className="mt-3 inline-block text-sm text-emerald-700 hover:underline"
+        >
+          Cost trends & anomaly detection →
+        </Link>
       </header>
 
       <div className="rounded-xl border border-gray-200 p-6 shadow-sm">
