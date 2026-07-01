@@ -218,30 +218,30 @@ Finding(id, analysis_id, resource_id, detector, severity, risk, current_cost,
 **Objective:** ship the shift-left superpower — fixes as PRs.
 
 **Backend**
-- [ ] Remediation generator: emit corrected Terraform diff per IaC finding (and patched YAML for K8s)
-- [ ] GitHub App/webhook: on PR touching `.tf`, analyze the diff and post a cost + waste comment
-- [ ] "Open fix PR" action: bot commits the remediation to a branch and opens a PR
-- [ ] Signature verification + webhook idempotency
+- [x] Remediation generator: emit corrected Terraform diff per IaC finding (and patched YAML for K8s)
+- [x] GitHub App/webhook: on PR touching `.tf`, analyze the diff and post a cost + waste comment
+- [x] "Open fix PR" action: bot commits the remediation to a branch and opens a PR
+- [x] Signature verification + webhook idempotency
 
 **Frontend**
-- [ ] Diff viewer per finding (before/after HCL)
-- [ ] "Connect a repo" flow (or a mocked repo demo)
+- [x] Diff viewer per finding (before/after HCL)
+- [x] "Connect a repo" flow (or a mocked repo demo)
 
 **AI**
-- [ ] LLM writes the PR description/rationale (grounded on the deterministic diff + savings)
+- [x] LLM writes the PR description/rationale (grounded on the deterministic diff + savings)
 
 **Infrastructure**
-- [ ] Secrets handling for GitHub App creds
+- [x] Secrets handling for GitHub App creds
 
 **Testing**
-- [ ] Codegen produces valid, `terraform validate`-passing HCL on fixtures
-- [ ] Webhook handler tests (signature, idempotency)
+- [x] Codegen produces valid, `terraform validate`-passing HCL on fixtures
+- [x] Webhook handler tests (signature, idempotency)
 
 **Documentation**
-- [ ] `docs/github-app.md` setup guide
+- [x] `docs/github-app.md` setup guide
 
 **Deployment**
-- [ ] Webhook endpoint deployed/publicly reachable (or ngrok for demo)
+- [x] Webhook endpoint deployed/publicly reachable (or ngrok for demo)
 
 **Resume improvement:** *"Built a GitHub App that reviews Terraform pull requests, comments architect-grade cost analysis, and opens ready-to-merge fix PRs with validated HCL codegen — shifting FinOps into code review."*
 
