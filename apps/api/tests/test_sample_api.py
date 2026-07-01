@@ -41,6 +41,15 @@ def test_trends_endpoint_lists_savings_over_time():
     assert "created_at" in trends[-1]
 
 
+def test_anomalies_sample_flags_the_s3_spike():
+    report = client.post("/api/v1/anomalies/sample").json()
+    assert len(report["anomalies"]) == 1
+    a = report["anomalies"][0]
+    assert a["service"] == "s3" and a["period"] == "2026-06"
+    assert a["severity"] == "high"
+    assert report["forecast_total"] > 0
+
+
 def test_narrative_endpoint_prioritizes_via_template():
     analysis_id = client.post("/api/v1/analyses/sample").json()["id"]
     n = client.get(f"/api/v1/analyses/{analysis_id}/narrative").json()

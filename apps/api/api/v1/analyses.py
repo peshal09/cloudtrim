@@ -12,13 +12,14 @@ from typing import Annotated
 
 from ai import Narrative, make_explainer, prioritize_analysis
 from engine.aggregate import AnalysisAggregate
+from engine.anomaly import TrendReport, analyze_trends
 from engine.models import Finding
 from engine.pipeline import AnalysisResult, analyze, pending_result
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
 
 from api import report
 from api.jobs import async_enabled, enqueue_analysis, get_queue
-from api.sample_data import SAMPLE_CSV, SAMPLE_K8S, SAMPLE_TF
+from api.sample_data import SAMPLE_CSV, SAMPLE_HISTORY, SAMPLE_K8S, SAMPLE_TF
 from api.security import rate_limit, require_api_key
 from api.store import store
 from api.v1.schemas import AnalysisSummary, FindingDetail
@@ -81,6 +82,17 @@ async def create_analysis(
 def get_trends() -> list[dict]:
     """Savings over time — one point per completed analysis (historical trend)."""
     return store.trend()
+
+
+@router.post("/anomalies", response_model=TrendReport)
+async def detect_cost_anomalies(history: Annotated[UploadFile, File()]) -> TrendReport:
+    """Flag cost spikes (robust z-score) + forecast from a historical cost CSV."""
+    return analyze_trends(await _read_text(history))
+
+
+@router.post("/anomalies/sample", response_model=TrendReport)
+def sample_anomalies() -> TrendReport:
+    return analyze_trends(SAMPLE_HISTORY)
 
 
 @router.post("/analyses/sample", status_code=201, response_model=AnalysisSummary)
