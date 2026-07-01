@@ -50,9 +50,14 @@ def render_template(finding: Finding, resource: Resource | None) -> str:
         issues = ev.get("issues")
         if issues:
             parts.append(f"`{ident}` has governance gaps: {'; '.join(issues)}.")
-        else:
-            parts.append(ev.get("note") or f"`{ident}`: {finding.title}.")
-        parts.append("No direct dollar impact, but it weakens cost allocation and change safety.")
+            parts.append(
+                "No direct dollar impact, but it weakens cost allocation and change safety."
+            )
+        else:  # e.g. missing S3 lifecycle — a note-based hygiene finding
+            note = ev.get("note")
+            detail = f" — {note}" if note else ""
+            parts.append(f"`{ident}`: {finding.title.lower()}{detail}.")
+            parts.append("No savings are computed here, but it's worth fixing as hygiene.")
 
     else:
         parts.append(f"`{ident}`: {finding.title}.")
