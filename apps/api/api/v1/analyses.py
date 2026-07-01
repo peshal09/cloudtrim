@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from ai import make_explainer
+from ai import Narrative, make_explainer, prioritize_analysis
 from engine.aggregate import AnalysisAggregate
 from engine.models import Finding
 from engine.pipeline import analyze
@@ -83,6 +83,15 @@ def get_summary(analysis_id: str) -> AnalysisAggregate:
     if result is None:
         raise HTTPException(status_code=404, detail="analysis not found")
     return result.aggregate
+
+
+@router.get("/analyses/{analysis_id}/narrative", response_model=Narrative)
+def get_narrative(analysis_id: str) -> Narrative:
+    """Architect-voice prioritization narrative for the whole analysis."""
+    result = store.get(analysis_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="analysis not found")
+    return prioritize_analysis(result.aggregate)
 
 
 @router.get("/analyses/{analysis_id}/findings", response_model=list[Finding])

@@ -33,6 +33,14 @@ def test_summary_endpoint_returns_aggregate():
     assert summary["savings_by_detector"]["overprovisioned_rds"] == 124.83
 
 
+def test_narrative_endpoint_prioritizes_via_template():
+    analysis_id = client.post("/api/v1/analyses/sample").json()["id"]
+    n = client.get(f"/api/v1/analyses/{analysis_id}/narrative").json()
+    assert n["source"] == "template"
+    assert "aws_instance.batch" in n["text"]  # highest-savings opportunity
+    assert "$494.50" in n["text"]
+
+
 def test_sample_findings_are_explained_via_template():
     analysis_id = client.post("/api/v1/analyses/sample").json()["id"]
     findings = client.get(f"/api/v1/analyses/{analysis_id}/findings").json()

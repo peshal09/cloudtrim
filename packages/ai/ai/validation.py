@@ -27,16 +27,23 @@ def cited_amounts(text: str) -> list[float]:
     return out
 
 
-def validate_explanation(text: str, finding: Finding) -> tuple[bool, list[float]]:
-    """Return (ok, offending_amounts). Any cited $ not matching an engine number fails."""
-    allowed = {
-        round(finding.current_cost, 2),
-        round(finding.projected_cost, 2),
-        round(finding.monthly_savings, 2),
-    }
+def validate_amounts(text: str, allowed: set[float]) -> tuple[bool, list[float]]:
+    """Return (ok, offending). Any cited $ not matching an allowed engine number fails."""
     offending = [
         amount
         for amount in cited_amounts(text)
         if not any(abs(amount - a) <= _TOLERANCE for a in allowed)
     ]
     return (not offending, offending)
+
+
+def validate_explanation(text: str, finding: Finding) -> tuple[bool, list[float]]:
+    """A finding's explanation may cite only its own engine numbers."""
+    return validate_amounts(
+        text,
+        {
+            round(finding.current_cost, 2),
+            round(finding.projected_cost, 2),
+            round(finding.monthly_savings, 2),
+        },
+    )
