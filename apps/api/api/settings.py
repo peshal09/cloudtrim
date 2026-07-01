@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     # the API runs synchronously against an in-memory store (zero-dependency demo).
     database_url: str | None = None
     redis_url: str | None = None
+    # Week 4 — GitHub App. Webhook signature secret + a token (App installation
+    # token or PAT) used as the API bearer. Live tier only; tests inject a fake.
+    github_webhook_secret: str | None = None
+    github_token: str | None = None
+    github_api_url: str = "https://api.github.com"
 
 
 settings = Settings()
