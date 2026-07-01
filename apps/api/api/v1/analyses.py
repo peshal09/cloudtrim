@@ -13,7 +13,7 @@ from engine.pipeline import AnalysisResult, analyze
 from fastapi import APIRouter, File, HTTPException, Response, UploadFile
 
 from api import report
-from api.sample_data import SAMPLE_CSV, SAMPLE_TF
+from api.sample_data import SAMPLE_CSV, SAMPLE_K8S, SAMPLE_TF
 from api.store import store
 from api.v1.schemas import AnalysisSummary, FindingDetail
 
@@ -37,19 +37,25 @@ async def _read_text(file: UploadFile) -> str:
 
 @router.post("/analyses", status_code=201, response_model=AnalysisSummary)
 async def create_analysis(
-    terraform: Annotated[UploadFile, File()],
+    terraform: Annotated[UploadFile | None, File()] = None,
     billing: Annotated[UploadFile | None, File()] = None,
+    kubernetes: Annotated[UploadFile | None, File()] = None,
 ) -> AnalysisSummary:
-    tf_text = await _read_text(terraform)
+    if terraform is None and kubernetes is None:
+        raise HTTPException(status_code=400, detail="upload a terraform and/or kubernetes file")
+    tf_text = await _read_text(terraform) if terraform is not None else None
     csv_text = await _read_text(billing) if billing is not None else None
+    k8s_text = await _read_text(kubernetes) if kubernetes is not None else None
 
     result = analyze(
         explain=_explain,
         terraform_source=tf_text,
         billing_source=csv_text,
+        kubernetes_source=k8s_text,
         source_meta={
-            "terraform": terraform.filename,
+            "terraform": terraform.filename if terraform else None,
             "billing": billing.filename if billing else None,
+            "kubernetes": kubernetes.filename if kubernetes else None,
         },
     )
     store.save(result)
@@ -63,6 +69,7 @@ def create_sample_analysis() -> AnalysisSummary:
         explain=_explain,
         terraform_source=SAMPLE_TF,
         billing_source=SAMPLE_CSV,
+        kubernetes_source=SAMPLE_K8S,
         source_meta={"sample": True},
     )
     store.save(result)

@@ -8,6 +8,7 @@ export default function UploadPage() {
   const router = useRouter();
   const [tf, setTf] = useState<File | null>(null);
   const [csv, setCsv] = useState<File | null>(null);
+  const [k8s, setK8s] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,12 +35,22 @@ export default function UploadPage() {
 
       <div className="rounded-xl border border-gray-200 p-6 shadow-sm">
         <label className="block text-sm font-medium text-gray-700">
-          Terraform (.tf or plan JSON) <span className="text-red-500">*</span>
+          Terraform (.tf or plan JSON)
         </label>
         <input
           type="file"
           accept=".tf,.json"
           onChange={(e) => setTf(e.target.files?.[0] ?? null)}
+          className="mt-1 block w-full text-sm"
+        />
+
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Kubernetes manifests (optional)
+        </label>
+        <input
+          type="file"
+          accept=".yaml,.yml"
+          onChange={(e) => setK8s(e.target.files?.[0] ?? null)}
           className="mt-1 block w-full text-sm"
         />
 
@@ -54,8 +65,8 @@ export default function UploadPage() {
         />
 
         <button
-          disabled={!tf || busy}
-          onClick={() => tf && go(() => createAnalysis(tf, csv))}
+          disabled={(!tf && !k8s) || busy}
+          onClick={() => go(() => createAnalysis(tf, csv, k8s))}
           className="mt-6 w-full rounded-lg bg-gray-900 py-2.5 font-medium text-white disabled:opacity-40"
         >
           {busy ? "Analyzing…" : "Analyze"}

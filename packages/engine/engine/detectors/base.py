@@ -24,6 +24,9 @@ class DetectContext:
     rds_low_cpu_pct: float = 40.0
     oversize_min_rank: int = 5  # >= "xlarge" (see engine.sizing)
     required_tags: tuple[str, ...] = ("env", "owner")
+    # Kubernetes
+    k8s_high_replicas: int = 5  # >= this with no HPA -> over-provisioned
+    k8s_over_request_cpu_pct: float = 30.0  # usage below this vs requests -> over-requested
 
 
 class Detector(ABC):

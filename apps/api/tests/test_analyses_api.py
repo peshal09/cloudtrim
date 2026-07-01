@@ -77,3 +77,33 @@ def test_terraform_only_upload_still_works():
     resp = _upload(csv=None)
     assert resp.status_code == 201
     assert resp.json()["status"] == "complete"  # config-only findings (no savings needed)
+
+
+K8S = """
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: web, namespace: default }
+spec:
+  replicas: 6
+  template:
+    metadata: { labels: { app: web } }
+    spec:
+      containers:
+        - name: web
+          resources: { requests: { cpu: "500m" } }
+"""
+
+
+def test_kubernetes_only_upload():
+    files = {"kubernetes": ("k8s.yaml", K8S, "application/yaml")}
+    resp = client.post("/api/v1/analyses", files=files)
+    assert resp.status_code == 201
+    analysis_id = resp.json()["id"]
+    findings = client.get(f"/api/v1/analyses/{analysis_id}/findings").json()
+    detectors = {f["detector"] for f in findings}
+    assert "k8s_missing_limits" in detectors
+    assert "k8s_replica_overprovisioned" in detectors
+
+
+def test_upload_requires_at_least_one_file():
+    assert client.post("/api/v1/analyses", files={}).status_code == 400

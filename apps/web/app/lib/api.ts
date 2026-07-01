@@ -58,12 +58,14 @@ async function json<T>(res: Response): Promise<T> {
 }
 
 export function createAnalysis(
-  terraform: File,
+  terraform: File | null,
   billing: File | null,
+  kubernetes: File | null,
 ): Promise<AnalysisSummary> {
   const form = new FormData();
-  form.append("terraform", terraform);
+  if (terraform) form.append("terraform", terraform);
   if (billing) form.append("billing", billing);
+  if (kubernetes) form.append("kubernetes", kubernetes);
   return fetch(`${API_URL}/api/v1/analyses`, { method: "POST", body: form }).then(
     json<AnalysisSummary>,
   );

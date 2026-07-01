@@ -19,8 +19,8 @@ def test_sample_endpoint_runs_the_demo_dataset():
     body = resp.json()
     assert body["source_meta"]["sample"] is True
     # Deterministic demo total (matches the eval harness).
-    assert body["total_monthly_savings"] == 494.50
-    assert body["findings_count"] == 6
+    assert body["total_monthly_savings"] == 494.50  # deduped; K8s findings are $0
+    assert body["findings_count"] == 9  # 6 AWS + 3 Kubernetes
 
 
 def test_summary_endpoint_returns_aggregate():

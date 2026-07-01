@@ -46,6 +46,11 @@ def render_template(finding: Finding, resource: Resource | None) -> str:
         parts.append(f"{rtype} `{ident}` is a deletion candidate: {ev.get('reason', 'unused')}.")
         parts.append(f"Removing it saves {_money(finding.current_cost)}/mo.")
 
+    elif action == "review":  # K8s tuning finding (over-request, replica over-provisioning)
+        note = ev.get("note")
+        parts.append(f"`{ident}`: {note}." if note else f"`{ident}`: {finding.title.lower()}.")
+        parts.append("No dollar figure is attached (node-cost attribution is future work).")
+
     elif action == "governance":
         issues = ev.get("issues")
         if issues:

@@ -15,7 +15,7 @@ from engine.aggregate import AnalysisAggregate, aggregate
 from engine.detectors import DetectContext, run_detectors
 from engine.models import Analysis, AnalysisStatus, Finding, Resource
 from engine.normalizer import normalize
-from engine.parsers import parse_billing, parse_terraform
+from engine.parsers import parse_billing, parse_k8s, parse_terraform
 from engine.pricing import apply_pricing
 from engine.pricing.client import PricingClient
 from engine.risk import apply_risk
@@ -34,6 +34,7 @@ class AnalysisResult:
 def analyze(
     terraform_source: str | None = None,
     billing_source: str | None = None,
+    kubernetes_source: str | None = None,
     ctx: DetectContext | None = None,
     pricing_client: PricingClient | None = None,
     explain: Explainer | None = None,
@@ -41,7 +42,11 @@ def analyze(
 ) -> AnalysisResult:
     analysis = Analysis(status=AnalysisStatus.RUNNING, source_meta=dict(source_meta or {}))
 
-    config = parse_terraform(terraform_source) if terraform_source else []
+    config: list[Resource] = []
+    if terraform_source:
+        config += parse_terraform(terraform_source)
+    if kubernetes_source:
+        config += parse_k8s(kubernetes_source)
     billing = parse_billing(billing_source) if billing_source else []
     resources = normalize(config, billing, analysis.id)
 

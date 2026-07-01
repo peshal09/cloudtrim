@@ -45,3 +45,44 @@ aws_instance.web,ec2,us-east-1,t3.xlarge,$121.47,4.1,env=prod;owner=team-platfor
 aws_db_instance.main,rds,us-east-1,db.m5.xlarge,249.66,9.0,env=prod;owner=team-data
 i-0deadbeef42,ec2,us-east-1,t3.large,60.74,0.0,env=prod
 """
+
+SAMPLE_K8S = """
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: default
+spec:
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: web
+        env: prod
+    spec:
+      containers:
+        - name: web
+          image: acme/web:1.0
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-svc
+  namespace: default
+spec:
+  selector:
+    app: web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: legacy-svc
+  namespace: default
+spec:
+  selector:
+    app: legacy
+"""

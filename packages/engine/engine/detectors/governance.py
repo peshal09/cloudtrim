@@ -8,7 +8,7 @@ allocation and accountability.
 from __future__ import annotations
 
 from engine.detectors.base import DetectContext, Detector, config_attrs, make_finding, sources
-from engine.models import Finding, Resource, Severity
+from engine.models import Finding, Provider, Resource, Severity
 
 
 class GovernanceDetector(Detector):
@@ -16,7 +16,8 @@ class GovernanceDetector(Detector):
     title = "Governance anti-pattern (hardcoded region / missing tags)"
 
     def detect(self, resource: Resource, ctx: DetectContext) -> list[Finding]:
-        if "config" not in sources(resource):
+        # AWS/IaC hygiene only — K8s workloads have their own detectors and label model.
+        if resource.provider is not Provider.AWS or "config" not in sources(resource):
             return []
 
         attrs = config_attrs(resource)
