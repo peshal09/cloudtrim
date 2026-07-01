@@ -95,7 +95,7 @@ class Finding(BaseModel):
     detector: str  # detector key, e.g. "idle_ec2"
     title: str
     severity: Severity
-    risk: Risk
+    risk: Risk = Risk.MEDIUM  # provisional; set by the deterministic risk scorer (§ step 6)
     current_cost: float = 0.0  # USD/month, from pricing engine
     projected_cost: float = 0.0  # USD/month after remediation
     monthly_savings: float = 0.0  # current_cost - projected_cost
