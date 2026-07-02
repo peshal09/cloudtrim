@@ -1,7 +1,7 @@
 """PR description generator (BLUEPRINT.md §3 Week 4, §6).
 
 Writes the title + body for a fix PR, grounded on the deterministic patches and
-savings. Same bounded-LLM law: LLM when a key is set, a template otherwise, with
+savings. Same bounded-LLM law: the LLM when configured, a template otherwise, with
 dollar figures validated against the engine's numbers on both paths.
 """
 
@@ -13,6 +13,7 @@ from engine.models import ExplanationSource, Finding
 from pydantic import BaseModel
 
 from ai.config import AIConfig
+from ai.llm import run_llm
 from ai.validation import validate_amounts
 
 _SYSTEM = (
@@ -104,22 +105,4 @@ def _try_llm(
     config: AIConfig,
     client_factory: Callable[[AIConfig], object] | None,
 ) -> str | None:
-    try:
-        if client_factory:
-            client = client_factory(config)
-        else:
-            import LLM
-
-            client = LLM.LLM(api_key=config.api_key, max_retries=config.max_retries)
-        resp = client.messages.create(
-            model=config.model,
-            max_tokens=config.max_tokens,
-            system=_SYSTEM,
-            messages=[{"role": "user", "content": _build_prompt(findings)}],
-        )
-        if getattr(resp, "stop_reason", None) == "refusal":
-            return None
-        text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
-        return text.strip() or None
-    except Exception:  # noqa: BLE001 — never fail on an explainer error
-        return None
+    return run_llm(_SYSTEM, _build_prompt(findings), config, client_factory)

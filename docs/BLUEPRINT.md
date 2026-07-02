@@ -2,7 +2,7 @@
 
 > **Working thesis:** The FinOps market is saturated with *dashboards*. Almost nothing does **shift-left, explainable, remediation-generating** cost optimization that reviews infrastructure *like a senior cloud architect* and hands you the *fix*. That gap is CloudTrim's wedge.
 
-**Author's stance for this doc:** Founding Staff Engineer / Principal Architect. Optimizing for engineering depth, interview discussion value, and resume impact — *not* feature count or a flashy stack. Assumes you build with LLM Code, so implementation speed is not the constraint; **judgment and architecture are.**
+**Author's stance for this doc:** Founding Staff Engineer / Principal Architect. Optimizing for engineering depth, interview discussion value, and resume impact — *not* feature count or a flashy stack. Assumes you build with an AI coding assistant, so implementation speed is not the constraint; **judgment and architecture are.**
 
 ---
 
@@ -102,7 +102,7 @@ Finding(id, analysis_id, resource_id, detector, severity, risk, current_cost,
 
 ## 3. Six-Week Roadmap
 
-> Legend: each week is scoped to be a few focused sessions with LLM Code, not full-time weeks. Every week ends shippable.
+> Legend: each week is scoped to be a few focused sessions with an AI coding assistant, not full-time weeks. Every week ends shippable.
 
 ### Week 1 — Core engine + MVP
 **Objective:** deterministic Terraform + billing analysis with priced findings and a dashboard.
@@ -400,11 +400,11 @@ flowchart LR
 
 | Layer | Choice | Why | Alternatives & trade-off |
 |---|---|---|---|
-| Backend | **Python + FastAPI** | The parsing/cloud ecosystem (hcl2, boto3, kubernetes, PyYAML) is Python-native; async support; fast iteration with LLM Code | **Go** gives stronger concurrency + infra credibility, but weaker IaC-parsing libs and slower iteration. Trade velocity for cred — note in interviews you'd pick Go for a high-throughput rewrite of the workers. |
+| Backend | **Python + FastAPI** | The parsing/cloud ecosystem (hcl2, boto3, kubernetes, PyYAML) is Python-native; async support; fast iteration with an AI coding assistant | **Go** gives stronger concurrency + infra credibility, but weaker IaC-parsing libs and slower iteration. Trade velocity for cred — note in interviews you'd pick Go for a high-throughput rewrite of the workers. |
 | Job queue | **Redis + Celery (or RQ)** | Simple, battle-tested, easy local dev; gives you real async/worker-pool talking points | **SQS/Cloud Tasks** (managed, but ties you to a cloud); **Kafka** (overkill). RQ is simpler than Celery — pick RQ if you want less config. |
 | Database | **Postgres** (JSONB for evidence) | Relational for analyses/resources/findings + flexible JSON for heterogeneous evidence | **SQLite** for a local-first demo (simpler, less "prod"); **Mongo** (loses relational joins you want). |
 | Cache | **Redis** | Reuse the broker; cache pricing + LLM responses (cost + latency) | In-proc LRU (doesn't survive restarts / multi-worker). |
-| LLM | **LLM / OpenAI via API**, structured outputs | Explanation quality; structured output enables validation | Local model (Ollama) as fallback for a privacy story; trade quality for control. |
+| LLM | **an LLM via API**, structured outputs | Explanation quality; structured output enables validation | Local model (Ollama) as fallback for a privacy story; trade quality for control. |
 | Pricing | **AWS Price List (bulk JSON), cached** | Deterministic, offline-capable, no account needed for demo | Live Cost Explorer/CUR (accurate but needs a real account + spend). |
 | IaC parse | **`terraform show -json` plan** (primary) + `python-hcl2` (fallback) | Plan JSON is the accurate, resolved view; HCL fallback handles raw files | Regex parsing (fragile — avoid). |
 | Frontend | **Next.js + React + Tailwind + Recharts** | Reuse your CineMind stack; fast, familiar, good charts | Plain React/Vite (fine, less batteries-included). |

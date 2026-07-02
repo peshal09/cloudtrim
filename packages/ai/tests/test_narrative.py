@@ -1,4 +1,5 @@
 from ai import AIConfig
+from ai.llm import LLMResult
 from ai.narrative import prioritize_analysis, render_template
 from engine.aggregate import AnalysisAggregate, Opportunity
 from engine.models import ExplanationSource, Severity
@@ -58,31 +59,26 @@ def test_template_handles_no_savings():
     assert "$" not in text
 
 
-class _Resp:
-    stop_reason = "end_turn"
+KEYED = AIConfig(api_key="k", base_url="http://llm.test/v1", model="test-model")
 
+
+class _LLM:
     def __init__(self, text):
-        self.content = [type("B", (), {"type": "text", "text": text})()]
+        self._text = text
 
-
-class _Client:
-    def __init__(self, text):
-        self.messages = type("M", (), {"create": lambda _self, **kw: _Resp(text)})()
+    def complete(self, system, user):
+        return LLMResult(self._text)
 
 
 def test_llm_narrative_used_when_valid():
     good = "You can save $305.10/mo. Start with aws_instance.batch to save $248.20/mo."
-    n = prioritize_analysis(
-        _agg(), config=AIConfig(api_key="k"), client_factory=lambda cfg: _Client(good)
-    )
+    n = prioritize_analysis(_agg(), config=KEYED, client_factory=lambda cfg: _LLM(good))
     assert n.source is ExplanationSource.LLM
     assert n.text == good
 
 
 def test_llm_hallucination_falls_back_to_template():
     bad = "You can save $9999.00/mo this quarter."
-    n = prioritize_analysis(
-        _agg(), config=AIConfig(api_key="k"), client_factory=lambda cfg: _Client(bad)
-    )
+    n = prioritize_analysis(_agg(), config=KEYED, client_factory=lambda cfg: _LLM(bad))
     assert n.source is ExplanationSource.TEMPLATE
     assert "$305.10" in n.text

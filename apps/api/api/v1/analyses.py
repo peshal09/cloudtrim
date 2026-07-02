@@ -27,7 +27,7 @@ from api.v1.schemas import AnalysisSummary, FindingDetail
 # Auth + rate limiting are opt-in (no-ops until configured) — see api.security.
 router = APIRouter(tags=["analyses"], dependencies=[Depends(require_api_key), Depends(rate_limit)])
 
-# Template path unless CLOUDTRIM_LLM_API_KEY is set (see [[deterministic-offline-path]]).
+# Template path unless an LLM provider is configured (see [[deterministic-offline-path]]).
 _explain = make_explainer()
 
 _MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB; tighter limits + streaming come in Week 5

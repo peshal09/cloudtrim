@@ -5,9 +5,9 @@ Design (your three requirements):
   2. Validation runs on BOTH paths — one code path, structural guardrail.
   3. Every explanation is tagged explanation_source (template|llm), visible + testable.
 
-LLM is used only when a key is configured; on any error, empty output, refusal,
-or validation failure, we fall back to the template. The full flow therefore works
-with zero keys — CI asserts the template path.
+The LLM is used only when a provider is configured; on any error, empty output,
+refusal, or validation failure, we fall back to the template. The full flow therefore
+works with zero config — CI asserts the template path.
 """
 
 from __future__ import annotations
@@ -18,8 +18,8 @@ from engine.models import ExplanationSource, Finding, Resource
 
 from ai.cache import cache, finding_key
 from ai.config import AIConfig
+from ai.llm import run_llm
 from ai.templates import render_template
-from ai.usage import record_response
 from ai.validation import validate_explanation
 
 _SYSTEM = (
@@ -106,29 +106,4 @@ def _try_llm(
     config: AIConfig,
     client_factory: Callable[[AIConfig], object] | None,
 ) -> str | None:
-    """Best-effort LLM call. Returns None on any failure (pipeline never fails)."""
-    prompt = _build_prompt(finding, resource)
-    if len(prompt) > config.max_prompt_chars:  # guardrail: don't send an oversized prompt
-        return None
-    try:
-        client = client_factory(config) if client_factory else _default_client(config)
-        resp = client.messages.create(
-            model=config.model,
-            max_tokens=config.max_tokens,
-            system=_SYSTEM,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        record_response(resp)  # token/cost accounting
-        if getattr(resp, "stop_reason", None) == "refusal":
-            return None
-        text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
-        return text.strip() or None
-    except Exception:  # noqa: BLE001 — never fail the analysis on an explainer error
-        return None
-
-
-def _default_client(config: AIConfig) -> object:
-    import LLM  # lazy: optional dependency, only when a key is set
-
-    # SDK retries 429/5xx/connection errors with backoff (max_retries).
-    return LLM.LLM(api_key=config.api_key, max_retries=config.max_retries)
+    return run_llm(_SYSTEM, _build_prompt(finding, resource), config, client_factory)

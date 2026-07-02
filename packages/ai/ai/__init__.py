@@ -1,7 +1,7 @@
 """CloudTrim AI layer — the LLM is a narrator, never authoritative.
 
 explain_finding() renders an architect-voice explanation from engine evidence,
-using LLM when a key is set and a deterministic template otherwise. Its output
+using the LLM when configured and a deterministic template otherwise. Its output
 is validated against the engine's numbers on both paths. See docs/BLUEPRINT.md §6.
 """
 

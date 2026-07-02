@@ -92,7 +92,7 @@ tier gated on credentials — see [[deterministic-offline-path]]:
 | Dependency | Deterministic tier (tests/eval/demo) | Live tier |
 |---|---|---|
 | Pricing | committed `snapshot.json` | AWS Price List Query API (boto3) |
-| LLM | template explainer | LLM (`CLOUDTRIM_LLM_API_KEY`) |
+| LLM | template explainer | the LLM (`CLOUDTRIM_LLM_API_KEY`) |
 | Database | SQLite | Postgres (`CLOUDTRIM_DATABASE_URL`) |
 | Queue | fakeredis + RQ sync mode | Redis + RQ worker |
 

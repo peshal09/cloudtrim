@@ -27,11 +27,10 @@ dev = [
 aws = [
     "boto3>=1.35",
 ]
-# LLM explainer (LLM). Optional: the deterministic template path serves
+# The LLM explainer talks to a configurable OpenAI-compatible endpoint over httpx
+# (already a runtime dep) — no provider SDK. The deterministic template path serves
 # tests/eval/demo with no key or network (see [[deterministic-offline-path]]).
-ai = [
-    "LLM>=0.40",
-]
+#
 # PDF report export. fpdf2 is pure-Python (no system libraries) — Markdown export
 # works without it.
 reports = [

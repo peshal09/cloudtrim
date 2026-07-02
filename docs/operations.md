@@ -12,8 +12,8 @@ against an in-memory store with the deterministic template explainer and no keys
 |---|---|
 | `CLOUDTRIM_DATABASE_URL` | Postgres persistence (async path). e.g. `postgresql+psycopg://…` |
 | `CLOUDTRIM_REDIS_URL` | RQ broker. Setting this **and** the DB enables async enqueue → worker. |
-| `CLOUDTRIM_LLM_API_KEY` | Use LLM for explanations/narrative (else template). |
-| `CLOUDTRIM_LLM_MODEL` | Model id (default `LLM-opus-4-8`). |
+| `CLOUDTRIM_LLM_API_KEY` | Use the LLM for explanations/narrative (else template). |
+| `CLOUDTRIM_LLM_MODEL` | Model id for the LLM endpoint. |
 | `CLOUDTRIM_API_KEYS` | Comma-separated keys → enables API-key auth. |
 | `CLOUDTRIM_RATE_LIMIT_PER_MINUTE` | > 0 → per-client rate limiting. |
 | `CLOUDTRIM_CACHE_TTL_SECONDS` | Explanation cache TTL (default 3600; 0 = no expiry). |

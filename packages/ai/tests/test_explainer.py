@@ -1,6 +1,7 @@
 import pytest
 from ai import AIConfig, explain_finding, make_explainer, render_template, validate_explanation
 from ai.cache import cache
+from ai.llm import LLMResult
 from engine.models import ExplanationSource, Finding, Resource, ResourceType, Risk, Severity
 
 NO_KEY = AIConfig(api_key=None)
@@ -97,40 +98,22 @@ def test_make_explainer_runs_template_path_with_no_key():
 
 # --- LLM path via injected fake client ---------------------------------------
 
-
-class _FakeBlock:
-    type = "text"
-
-    def __init__(self, text):
-        self.text = text
+# A configured (enabled) provider requires base_url + model + key.
+KEYED = AIConfig(api_key="k", base_url="http://llm.test/v1", model="test-model")
 
 
-class _FakeResp:
-    stop_reason = "end_turn"
-
-    def __init__(self, text):
-        self.content = [_FakeBlock(text)]
-
-
-class _FakeMessages:
+class _FakeLLM:
     def __init__(self, text):
         self._text = text
 
-    def create(self, **kwargs):
-        return _FakeResp(self._text)
-
-
-class _FakeClient:
-    def __init__(self, text):
-        self.messages = _FakeMessages(text)
+    def complete(self, system, user):
+        return LLMResult(self._text)
 
 
 def test_llm_path_used_when_valid():
     f, r = _rightsize_finding(), _res()
     good = "EC2 aws_instance.web idles at 3.2% CPU; downsize to save $30.37/mo. Low risk."
-    explain_finding(
-        f, r, config=AIConfig(api_key="k"), client_factory=lambda cfg: _FakeClient(good)
-    )
+    explain_finding(f, r, config=KEYED, client_factory=lambda cfg: _FakeLLM(good))
     assert f.explanation_source is ExplanationSource.LLM
     assert f.explanation == good
 
@@ -138,7 +121,7 @@ def test_llm_path_used_when_valid():
 def test_llm_hallucination_falls_back_to_template():
     f, r = _rightsize_finding(), _res()
     bad = "This resource wastes $12345.00 every month."  # not an engine number
-    explain_finding(f, r, config=AIConfig(api_key="k"), client_factory=lambda cfg: _FakeClient(bad))
+    explain_finding(f, r, config=KEYED, client_factory=lambda cfg: _FakeLLM(bad))
     assert f.explanation_source is ExplanationSource.TEMPLATE
     assert "$30.37" in f.explanation
 
@@ -148,5 +131,5 @@ def test_llm_error_falls_back_to_template():
         raise RuntimeError("network down")
 
     f, r = _rightsize_finding(), _res()
-    explain_finding(f, r, config=AIConfig(api_key="k"), client_factory=boom)
+    explain_finding(f, r, config=KEYED, client_factory=boom)
     assert f.explanation_source is ExplanationSource.TEMPLATE

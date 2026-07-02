@@ -1,7 +1,7 @@
 """Analysis-wide prioritization narrative (BLUEPRINT.md §3 Week 2, §6).
 
 "Fix these first, and here's why" across the whole analysis — the same bounded-LLM
-law as explain_finding: LLM when a key is set, a deterministic architect-voice
+law as explain_finding: the LLM when configured, a deterministic architect-voice
 template otherwise, with dollar figures validated against the engine's aggregate on
 both paths.
 """
@@ -15,6 +15,7 @@ from engine.models import ExplanationSource
 from pydantic import BaseModel
 
 from ai.config import AIConfig
+from ai.llm import run_llm
 from ai.validation import validate_amounts
 
 _SYSTEM = (
@@ -108,22 +109,4 @@ def _try_llm(
     config: AIConfig,
     client_factory: Callable[[AIConfig], object] | None,
 ) -> str | None:
-    try:
-        if client_factory:
-            client = client_factory(config)
-        else:
-            import LLM
-
-            client = LLM.LLM(api_key=config.api_key, max_retries=config.max_retries)
-        resp = client.messages.create(
-            model=config.model,
-            max_tokens=config.max_tokens,
-            system=_SYSTEM,
-            messages=[{"role": "user", "content": _build_prompt(agg)}],
-        )
-        if getattr(resp, "stop_reason", None) == "refusal":
-            return None
-        text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
-        return text.strip() or None
-    except Exception:  # noqa: BLE001 — never fail on an explainer error
-        return None
+    return run_llm(_SYSTEM, _build_prompt(agg), config, client_factory)

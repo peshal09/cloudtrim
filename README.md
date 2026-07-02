@@ -85,4 +85,4 @@ infra/  docs/           # deploy manifests · spec, ADRs, architecture
 
 ## Tech stack
 
-Python + FastAPI · Redis/Celery worker pool (Week 3) · Postgres (Week 3) · Next.js + Tailwind · AWS Price List pricing · LLM/OpenAI (explanation only, validated).
+Python + FastAPI · Redis/Celery worker pool (Week 3) · Postgres (Week 3) · Next.js + Tailwind · AWS Price List pricing · an LLM (explanation only, validated).

@@ -45,4 +45,4 @@ Draw a hard architectural boundary:
 
 **Neutral**
 - Every dollar figure must trace to `packages/engine/engine/pricing`; no magic
-  numbers elsewhere. Enforced by convention and review (see `LLM.md`).
+  numbers elsewhere. Enforced by convention and review (see `CONVENTIONS.md`).

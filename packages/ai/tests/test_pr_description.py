@@ -1,8 +1,10 @@
 from ai import AIConfig, describe_pr
+from ai.llm import LLMResult
 from ai.pr_description import render_template
 from engine.models import ExplanationSource, Finding, Risk, Severity
 
 NO_KEY = AIConfig(api_key=None)
+KEYED = AIConfig(api_key="k", base_url="http://llm.test/v1", model="test-model")
 
 
 def _rightsize(ident, cur, tgt, savings, risk=Risk.MEDIUM):
@@ -39,27 +41,23 @@ def test_template_lists_each_change():
     assert "$60.73" in body and "$124.83" in body
 
 
-class _Resp:
-    stop_reason = "end_turn"
-
+class _LLM:
     def __init__(self, text):
-        self.content = [type("B", (), {"type": "text", "text": text})()]
+        self._text = text
 
-
-class _Client:
-    def __init__(self, text):
-        self.messages = type("M", (), {"create": lambda _s, **k: _Resp(text)})()
+    def complete(self, system, user):
+        return LLMResult(self._text)
 
 
 def test_llm_body_used_when_valid():
     good = "Rightsizes two resources for $185.56/mo total: web saves $60.73/mo."
-    pr = describe_pr(FINDINGS, config=AIConfig(api_key="k"), client_factory=lambda c: _Client(good))
+    pr = describe_pr(FINDINGS, config=KEYED, client_factory=lambda c: _LLM(good))
     assert pr.source is ExplanationSource.LLM
     assert pr.body == good
 
 
 def test_llm_hallucination_falls_back():
     bad = "This saves $9,999.00/mo."
-    pr = describe_pr(FINDINGS, config=AIConfig(api_key="k"), client_factory=lambda c: _Client(bad))
+    pr = describe_pr(FINDINGS, config=KEYED, client_factory=lambda c: _LLM(bad))
     assert pr.source is ExplanationSource.TEMPLATE
     assert "$185.56" in pr.body
